@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Move, 
@@ -254,11 +254,37 @@ export default function App() {
 }
 
 function PortfolioApp() {
-  const [data, setData] = useState<PortfolioData>(INITIAL_DATA);
+  const [data, setData] = useState<PortfolioData>(() => {
+    try {
+      const draft = localStorage.getItem('portfolio_draft');
+      if (draft) return JSON.parse(draft);
+    } catch (e) {
+      console.error("Failed to load draft", e);
+    }
+    return INITIAL_DATA;
+  });
   const [backupData, setBackupData] = useState<PortfolioData | null>(null);
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(() => {
+    return localStorage.getItem('portfolio_draft') !== null;
+  });
+  const isEditModeRef = useRef(isEditMode);
+
+  useEffect(() => {
+    isEditModeRef.current = isEditMode;
+    if (isEditMode) {
+      try {
+        localStorage.setItem('portfolio_draft', JSON.stringify(data));
+      } catch (e) {
+        console.warn("Failed to save draft to localStorage (likely quota exceeded).", e);
+        // Optionally, we could clear the draft if it's too big, but just catching the error prevents the crash.
+      }
+    } else {
+      localStorage.removeItem('portfolio_draft');
+    }
+  }, [isEditMode, data]);
   const [expandedGenre, setExpandedGenre] = useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
@@ -277,17 +303,27 @@ function PortfolioApp() {
 
   const logout = () => signOut(auth);
 
-  const saveToFirebase = async (newData: PortfolioData) => {
+  const saveToFirebase = async (newData: PortfolioData): Promise<boolean> => {
     if (!isAdmin) {
       alert("Admin 권한이 없습니다.");
-      return;
+      return false;
     }
+
+    const jsonString = JSON.stringify(newData);
+    const sizeInBytes = new Blob([jsonString]).size;
+    if (sizeInBytes > 900000) { // ~900KB to be safe
+      alert(`데이터 용량이 너무 큽니다! (현재: ${(sizeInBytes / 1024 / 1024).toFixed(2)}MB / 최대: 1MB)\n\nFirebase Firestore의 문서 용량 제한(1MB)을 초과했습니다. 이미지를 삭제하거나 외부 이미지 링크(URL)를 사용해주세요.`);
+      return false;
+    }
+
     const path = 'portfolios/main';
     try {
       await setDoc(doc(db, path), newData);
       alert("성공적으로 저장되었습니다.");
+      return true;
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, path);
+      return false;
     }
   };
 
@@ -463,13 +499,16 @@ function PortfolioApp() {
     const unsubscribe = onSnapshot(doc(db, path), (snapshot) => {
       if (snapshot.exists()) {
         const remoteData = snapshot.data() as PortfolioData;
-        setData(prev => ({
-          ...INITIAL_DATA,
-          ...remoteData,
-          style: { ...INITIAL_DATA.style, ...(remoteData.style || {}) },
-          fonts: { ...INITIAL_DATA.fonts, ...(remoteData.fonts || {}) },
-          textStyles: { ...INITIAL_DATA.textStyles, ...(remoteData.textStyles || {}) }
-        }));
+        setData(prev => {
+          if (isEditModeRef.current) return prev;
+          return {
+            ...INITIAL_DATA,
+            ...remoteData,
+            style: { ...INITIAL_DATA.style, ...(remoteData.style || {}) },
+            fonts: { ...INITIAL_DATA.fonts, ...(remoteData.fonts || {}) },
+            textStyles: { ...INITIAL_DATA.textStyles, ...(remoteData.textStyles || {}) }
+          };
+        });
       }
     }, (error) => {
       handleFirestoreError(error, OperationType.GET, path);
@@ -689,10 +728,12 @@ function PortfolioApp() {
                     Cancel
                   </button>
                   <button 
-                    onClick={() => {
-                      saveToFirebase(data);
-                      setIsEditMode(false);
-                      setBackupData(null);
+                    onClick={async () => {
+                      const success = await saveToFirebase(data);
+                      if (success) {
+                        setIsEditMode(false);
+                        setBackupData(null);
+                      }
                     }}
                     className="flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 text-white transition-all text-sm font-medium"
                   >
@@ -1387,28 +1428,60 @@ function PortfolioApp() {
                   onDragOver={(e) => {
                     if (isEditMode) e.preventDefault();
                   }}
-                  onDrop={(e) => {
+                  onDrop={async (e) => {
                     if (!isEditMode) return;
                     e.preventDefault();
-                    const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
-                    if (files.length === 0) return;
+                    const files = Array.from(e.dataTransfer.files) as File[];
+                    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+                    if (imageFiles.length === 0) return;
 
                     const newImages = [...(selectedProject.images || [])];
-                    let processedCount = 0;
 
-                    files.forEach(file => {
-                      const reader = new FileReader();
-                      reader.onload = (event) => {
-                        if (event.target?.result) {
-                          newImages.push(event.target.result as string);
-                        }
-                        processedCount++;
-                        if (processedCount === files.length) {
-                          updateProject(selectedProject.id, 'images', newImages);
-                        }
-                      };
-                      reader.readAsDataURL(file);
-                    });
+                    for (const file of imageFiles) {
+                      try {
+                        const compressedBase64 = await new Promise<string>((resolve, reject) => {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            const img = new Image();
+                            img.onload = () => {
+                              const canvas = document.createElement('canvas');
+                              const MAX_WIDTH = 1024;
+                              const MAX_HEIGHT = 1024;
+                              let width = img.width;
+                              let height = img.height;
+
+                              if (width > height) {
+                                if (width > MAX_WIDTH) {
+                                  height *= MAX_WIDTH / width;
+                                  width = MAX_WIDTH;
+                                }
+                              } else {
+                                if (height > MAX_HEIGHT) {
+                                  width *= MAX_HEIGHT / height;
+                                  height = MAX_HEIGHT;
+                                }
+                              }
+
+                              canvas.width = width;
+                              canvas.height = height;
+                              const ctx = canvas.getContext('2d');
+                              ctx?.drawImage(img, 0, 0, width, height);
+                              
+                              // Compress to JPEG with 0.6 quality to save space
+                              resolve(canvas.toDataURL('image/jpeg', 0.6));
+                            };
+                            img.onerror = reject;
+                            img.src = event.target?.result as string;
+                          };
+                          reader.onerror = reject;
+                          reader.readAsDataURL(file);
+                        });
+                        newImages.push(compressedBase64);
+                      } catch (err) {
+                        console.error("Failed to compress image", err);
+                      }
+                    }
+                    updateProject(selectedProject.id, 'images', newImages);
                   }}
                 >
                   <div className="flex items-center justify-between">
@@ -1431,7 +1504,15 @@ function PortfolioApp() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {(selectedProject.images || []).map((img, idx) => (
                       <div key={idx} className="space-y-4 group/img">
-                        <div className="aspect-video glass rounded-3xl overflow-hidden relative">
+                        <div 
+                          className={cn(
+                            "aspect-video glass rounded-3xl overflow-hidden relative",
+                            !isEditMode && img && "cursor-pointer"
+                          )}
+                          onClick={() => {
+                            if (!isEditMode && img) setSelectedImage(img);
+                          }}
+                        >
                           {img ? (
                             <img src={img || undefined} alt="" className="w-full h-full object-cover opacity-90 group-hover/img:opacity-100 transition-all duration-700 hover:scale-105" referrerPolicy="no-referrer" />
                           ) : (
@@ -1483,6 +1564,39 @@ function PortfolioApp() {
                   </div>
                 </div>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Image Lightbox Modal */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8"
+          >
+            <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setSelectedImage(null)} />
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-6 right-6 z-20 p-3 glass rounded-full hover:bg-orange-500 transition-colors group"
+            >
+              <X className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </button>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center"
+            >
+              <img 
+                src={selectedImage} 
+                alt="Enlarged view" 
+                className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                referrerPolicy="no-referrer"
+              />
             </motion.div>
           </motion.div>
         )}
