@@ -562,6 +562,56 @@ function PortfolioApp() {
     }));
   };
 
+  const handleImageDrop = async (e: React.DragEvent, onImageProcessed: (base64: string) => void) => {
+    if (!isEditMode) return;
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files) as File[];
+    const imageFile = files.find(file => file.type.startsWith('image/'));
+    if (!imageFile) return;
+
+    try {
+      const compressedBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 1024;
+            const MAX_HEIGHT = 1024;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+            
+            resolve(canvas.toDataURL('image/jpeg', 0.6));
+          };
+          img.onerror = reject;
+          img.src = event.target?.result as string;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(imageFile);
+      });
+      onImageProcessed(compressedBase64);
+    } catch (err) {
+      console.error("Failed to compress image", err);
+    }
+  };
+
   const addProject = (genre?: string) => {
     const newProject: Project = {
       id: Date.now().toString(),
@@ -804,7 +854,16 @@ function PortfolioApp() {
           className="flex flex-col items-center text-center"
         >
           {/* Logo Section */}
-          <div className="mb-2 w-full max-w-xl relative group flex flex-col items-center">
+          <div 
+            className={cn(
+              "mb-2 w-full max-w-xl relative group flex flex-col items-center",
+              isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
+            )}
+            onDragOver={(e) => {
+              if (isEditMode) e.preventDefault();
+            }}
+            onDrop={(e) => handleImageDrop(e, (base64) => updateField('logoUrl', base64))}
+          >
             <img 
               src={data.logoUrl || undefined} 
               alt="Bul-Han-Dang Logo" 
@@ -827,7 +886,16 @@ function PortfolioApp() {
             )}
           </div>
 
-          <div className="relative group/maintitle flex flex-col items-center">
+          <div 
+            className={cn(
+              "relative group/maintitle flex flex-col items-center",
+              isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
+            )}
+            onDragOver={(e) => {
+              if (isEditMode) e.preventDefault();
+            }}
+            onDrop={(e) => handleImageDrop(e, (base64) => updateField('mainTitleImageUrl', base64))}
+          >
             <img 
               src={data.mainTitleImageUrl || undefined} 
               alt={data.studioName}
@@ -850,7 +918,16 @@ function PortfolioApp() {
               </div>
             )}
           </div>
-          <div className="-mt-20 mb-6 relative group/hanja flex flex-col items-center">
+          <div 
+            className={cn(
+              "-mt-20 mb-6 relative group/hanja flex flex-col items-center",
+              isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
+            )}
+            onDragOver={(e) => {
+              if (isEditMode) e.preventDefault();
+            }}
+            onDrop={(e) => handleImageDrop(e, (base64) => updateField('studioNameHanjaUrl', base64))}
+          >
             <img 
               src={data.studioNameHanjaUrl || undefined} 
               alt="不汗黨" 
@@ -1089,7 +1166,14 @@ function PortfolioApp() {
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="relative group"
+              className={cn(
+                "relative group",
+                isEditMode && "p-4 border border-dashed border-white/10 rounded-[40px] hover:border-orange-500/30 transition-colors"
+              )}
+              onDragOver={(e) => {
+                if (isEditMode) e.preventDefault();
+              }}
+              onDrop={(e) => handleImageDrop(e, (base64) => updateField('designerPhoto', base64))}
             >
               <div className="aspect-[3/4] glass rounded-[32px] overflow-hidden relative shadow-2xl">
                 <img 
