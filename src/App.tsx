@@ -852,7 +852,7 @@ function PortfolioApp() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="flex flex-col items-center text-center gap-8 md:gap-12"
+          className="flex flex-col items-center text-center gap-16 md:gap-24"
         >
           {/* Logo Section */}
           <div 
@@ -869,9 +869,6 @@ function PortfolioApp() {
               src={data.logoUrl || undefined} 
               alt="Bul-Han-Dang Logo" 
               className="w-full h-auto object-contain max-h-[115px] opacity-80"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
               referrerPolicy="no-referrer"
             />
             {isEditMode && (
@@ -901,9 +898,6 @@ function PortfolioApp() {
               src={data.mainTitleImageUrl || undefined} 
               alt={data.studioName}
               className="h-[168px] md:h-[280px] w-auto object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
               referrerPolicy="no-referrer"
             />
             
@@ -921,7 +915,7 @@ function PortfolioApp() {
           </div>
           <div 
             className={cn(
-              "-mt-20 mb-6 relative group/hanja flex flex-col items-center",
+              "relative group/hanja flex flex-col items-center",
               isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
             )}
             onDragOver={(e) => {
@@ -933,9 +927,6 @@ function PortfolioApp() {
               src={data.studioNameHanjaUrl || undefined} 
               alt="不汗黨" 
               className="h-[80px] md:h-[120px] w-auto object-contain opacity-80"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
               referrerPolicy="no-referrer"
             />
             {isEditMode && (
