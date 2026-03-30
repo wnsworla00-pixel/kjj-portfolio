@@ -3,28 +3,45 @@ export interface Project {
   title: string;
   genre: string;
   role: string;
-  venue?: string;
   year: string;
   description?: string;
   images?: string[];
+  location?: string;
 }
 
 export interface PortfolioData {
   name: string;
   studioName: string;
-  studioNameHanja: string;
+  mainTitleImageUrl?: string;
+  studioNameHanjaUrl: string;
+  heroSub?: string;
   designerPhoto: string;
   logoUrl: string;
+  copyright?: string;
   fonts: {
     sans: string;
     serif: string;
   };
-  style: {
-    h1Size: string;
-    h2Size: string;
-    bodySize: string;
-    accentSize: string;
-    hanjaSize: string;
+  style?: {
+    h1Size: number;
+    h1Color: string;
+    h1Opacity: number;
+    h2Size: number;
+    h2Color: string;
+    h2Opacity: number;
+    bodySize: number;
+    bodyColor: string;
+    bodyOpacity: number;
+    accentSize: number;
+    accentColor: string;
+    accentOpacity: number;
+  };
+  textStyles: {
+    [path: string]: {
+      size: number;
+      color: string;
+      opacity: number;
+    };
   };
   intro: {
     quote: string;
@@ -33,9 +50,11 @@ export interface PortfolioData {
   projects: Project[];
   about: {
     name: string;
+    englishName?: string;
     role: string;
     quote: string;
     description: string;
+    education?: string[];
   };
   contact: {
     email: string;

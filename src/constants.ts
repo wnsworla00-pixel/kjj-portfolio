@@ -3,19 +3,18 @@ import { PortfolioData } from './types';
 export const INITIAL_DATA: PortfolioData = {
   name: "김재준 (Jae-Jun Kim)",
   studioName: "불한당",
-  studioNameHanja: "不汗黨",
+  mainTitleImageUrl: "/title.png",
+  studioNameHanjaUrl: "/bhd.png",
   designerPhoto: "/03.png",
   logoUrl: "/Logo.png",
   fonts: {
     sans: "'Inter', sans-serif",
     serif: "'Cormorant Garamond', serif"
   },
-  style: {
-    h1Size: "7xl", // md:text-9xl
-    h2Size: "3xl", // md:text-4xl (Reduced from 4xl)
-    bodySize: "lg", // md:text-xl
-    accentSize: "xs", // tracking-widest labels
-    hanjaSize: "2xl" // Hanja text next to title
+  textStyles: {
+    'copyright': { size: 8, color: '#f97316', opacity: 0.6 },
+    'about.name': { size: 40, color: '#FFFFFF', opacity: 1 },
+    'about.englishName': { size: 24, color: '#FFFFFF', opacity: 0.6 }
   },
   intro: {
     quote: "무대 위에서 '불(빛)을 하는' 자, 불한당(不汗黨).",
@@ -27,48 +26,50 @@ export const INITIAL_DATA: PortfolioData = {
       title: "[Performance Title A]",
       genre: "Dance",
       role: "Lighting Designer",
-      venue: "National Theater of Korea",
+      location: "Seoul, Korea",
       year: "2025",
-      description: "공연의 디자인적인 내용을 여기에 담아보세요. 빛의 각도와 색감, 무대 연출 의도 등을 상세히 기록할 수 있습니다.",
-      images: ["https://picsum.photos/seed/stage1/1200/800", "https://picsum.photos/seed/stage2/1200/800"]
+      images: []
     },
     {
       id: 'p2',
       title: "[Performance Title B]",
       genre: "Musical",
       role: "Assistant Lighting Designer / Programmer",
+      location: "Seoul, Korea",
       year: "2024",
-      description: "뮤지컬 작업의 화려한 큐 연출과 프로그래밍 과정을 설명해보세요.",
-      images: ["https://picsum.photos/seed/stage3/1200/800"]
+      images: []
     },
     {
       id: 'p3',
       title: "[Performance Title C]",
       genre: "Theatre",
       role: "Lighting Designer",
+      location: "Seoul, Korea",
       year: "2024",
-      description: "연극 무대에서의 정교한 빛의 미학에 대해 설명해보세요.",
-      images: ["https://picsum.photos/seed/stage4/1200/800"]
+      images: []
     },
     {
       id: 'p4',
       title: "[Performance Title D]",
-      genre: "Concert",
+      genre: "Other",
       role: "Lighting Designer",
+      location: "Seoul, Korea",
       year: "2024",
-      description: "콘서트 무대의 역동적인 조명 연출에 대해 설명해보세요.",
-      images: ["https://picsum.photos/seed/stage5/1200/800"]
+      images: []
     }
   ],
   about: {
-    name: "김재준 (Jae-Jun Kim)",
-    role: "Lighting Designer / Director of Bul-Han-Dang",
-    quote: "무대 위에서 빛은 또 하나의 배우입니다.",
-    description: "관객이 극의 흐름에 자연스럽게 젖어들 수 있도록, 보이지 않는 곳에서 가장 치열하게 '불을 하는(do light)' 디자이너 김재준입니다."
+    name: "김재준",
+    englishName: "Jae-Jun Kim",
+    role: "Lighting Designer",
+    quote: "극의 공간안에 있는 것 처럼",
+    description: "관객이 극의 흐름에 자연스럽게 젖어들 수 있도록, 보이지 않는 곳에서 조명을 비추는 디자이너 김재준입니다.",
+    education: ["용인대학교 연극학과 학사"]
   },
   contact: {
-    email: "wnsworla20@naver.com",
+    email: "wnsworla00@gmail.com",
     instagram: "@bhd_light",
     phone: "010 3050 6111"
-  }
+  },
+  copyright: "© 2026 KJJ. ALL RIGHTS RESERVED."
 };

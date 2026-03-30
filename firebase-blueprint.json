@@ -1,0 +1,94 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "A portfolio project item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "genre": { "type": "string" },
+        "role": { "type": "string" },
+        "year": { "type": "string" },
+        "description": { "type": "string" },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "location": { "type": "string" }
+      },
+      "required": ["id", "title", "genre", "role", "year"]
+    },
+    "PortfolioData": {
+      "title": "PortfolioData",
+      "description": "The complete portfolio data",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "studioName": { "type": "string" },
+        "studioNameHanja": { "type": "string" },
+        "designerPhoto": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "fonts": {
+          "type": "object",
+          "properties": {
+            "sans": { "type": "string" },
+            "serif": { "type": "string" }
+          }
+        },
+        "style": {
+          "type": "object",
+          "properties": {
+            "h1Size": { "type": "number" },
+            "h1Color": { "type": "string" },
+            "h1Opacity": { "type": "number" },
+            "h2Size": { "type": "number" },
+            "h2Color": { "type": "string" },
+            "h2Opacity": { "type": "number" },
+            "bodySize": { "type": "number" },
+            "bodyColor": { "type": "string" },
+            "bodyOpacity": { "type": "number" },
+            "accentSize": { "type": "number" },
+            "accentColor": { "type": "string" },
+            "accentOpacity": { "type": "number" },
+            "hanjaSize": { "type": "number" },
+            "hanjaColor": { "type": "string" },
+            "hanjaOpacity": { "type": "number" }
+          }
+        },
+        "intro": {
+          "type": "object",
+          "properties": {
+            "quote": { "type": "string" },
+            "description": { "type": "string" }
+          }
+        },
+        "projects": {
+          "type": "array",
+          "items": { "$ref": "Project" }
+        },
+        "about": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "role": { "type": "string" },
+            "quote": { "type": "string" },
+            "description": { "type": "string" },
+            "education": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "contact": {
+          "type": "object",
+          "properties": {
+            "email": { "type": "string" },
+            "instagram": { "type": "string" },
+            "phone": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "portfolios": {
+      "schema": "PortfolioData",
+      "description": "Collection of portfolio data documents"
+    }
+  }
+}

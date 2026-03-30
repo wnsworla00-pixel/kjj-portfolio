@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: portfolios
+    // Document ID: main (or any unique ID)
+    // Fields:
+    //   - name: string
+    //   - studioName: string
+    //   - studioNameHanja: string
+    //   - designerPhoto: string
+    //   - logoUrl: string
+    //   - fonts: map { sans: string, serif: string }
+    //   - style: map { h1Size: string, h2Size: string, bodySize: string, accentSize: string, hanjaSize: string }
+    //   - intro: map { quote: string, description: string }
+    //   - projects: list of maps (Project entity)
+    //   - about: map { name: string, role: string, quote: string, description: string, education: list of strings }
+    //   - contact: map { email: string, instagram: string, phone: string }
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "wnsworla00@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidPortfolio(data) {
+      return data.keys().hasAll(['name', 'studioName', 'projects', 'about']) &&
+             data.name is string &&
+             data.studioName is string &&
+             data.projects is list &&
+             data.about is map &&
+             data.about.name is string &&
+             (!('education' in data.about) || data.about.education is list);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /portfolios/{docId} {
+      // Publicly readable so visitors can see the portfolio
+      allow read: if true;
+      
+      // Only the admin can create or update the portfolio
+      allow create: if isAdmin() && isValidPortfolio(request.resource.data);
+      allow update: if isAdmin() && isValidPortfolio(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated() && request.auth.uid == userId && request.resource.data.role == 'user';
+      allow update: if isAdmin(); // Only admin can change roles
+    }
+  }
+}
