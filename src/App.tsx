@@ -858,17 +858,17 @@ function PortfolioApp() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative pt-[350px] md:pt-[450px] lg:pt-[550px] pb-20 px-6 max-w-7xl mx-auto z-10">
+      <section className="relative pt-[180px] md:pt-[220px] lg:pt-[280px] pb-20 px-6 max-w-7xl mx-auto z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="flex flex-col items-center text-center gap-16 md:gap-24"
+          className="flex flex-col items-center text-center gap-8 md:gap-12"
         >
           {/* Main Hero Image Section */}
           <div 
             className={cn(
-              "relative group/maintitle flex flex-col items-center w-full max-w-3xl",
+              "relative group/maintitle flex flex-col items-center w-full max-w-2xl",
               isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
             )}
             onDragOver={(e) => {
@@ -879,7 +879,7 @@ function PortfolioApp() {
             <img 
               src={data.mainTitleImageUrl || undefined} 
               alt={data.studioName}
-              className="w-full h-auto max-h-[400px] md:max-h-[600px] object-contain"
+              className="w-full h-auto max-h-[320px] md:max-h-[480px] object-contain"
               referrerPolicy="no-referrer"
             />
             
