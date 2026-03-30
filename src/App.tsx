@@ -847,7 +847,7 @@ function PortfolioApp() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative pt-80 pb-20 px-6 max-w-7xl mx-auto z-10">
+      <section className="relative pt-[350px] md:pt-[450px] lg:pt-[550px] pb-20 px-6 max-w-7xl mx-auto z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
