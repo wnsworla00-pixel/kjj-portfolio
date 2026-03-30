@@ -288,6 +288,7 @@ function PortfolioApp() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
 
   const isAdmin = user?.email === "wnsworla00@gmail.com" && user?.emailVerified;
@@ -510,8 +511,10 @@ function PortfolioApp() {
           };
         });
       }
+      setIsLoading(false);
     }, (error) => {
       handleFirestoreError(error, OperationType.GET, path);
+      setIsLoading(false);
     });
 
     return () => unsubscribe();
@@ -709,6 +712,14 @@ function PortfolioApp() {
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a0502] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen overflow-hidden selection:bg-orange-500/30" style={{ fontFamily: 'var(--font-sans)' }}>
       {/* Atmospheric Background */}
@@ -854,39 +865,10 @@ function PortfolioApp() {
           transition={{ duration: 0.8 }}
           className="flex flex-col items-center text-center gap-16 md:gap-24"
         >
-          {/* Logo Section */}
+          {/* Main Hero Image Section */}
           <div 
             className={cn(
-              "w-full max-w-xl relative group flex flex-col items-center",
-              isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
-            )}
-            onDragOver={(e) => {
-              if (isEditMode) e.preventDefault();
-            }}
-            onDrop={(e) => handleImageDrop(e, (base64) => updateField('logoUrl', base64))}
-          >
-            <img 
-              src={data.logoUrl || undefined} 
-              alt="Bul-Han-Dang Logo" 
-              className="w-full h-auto object-contain max-h-[115px] opacity-80"
-              referrerPolicy="no-referrer"
-            />
-            {isEditMode && (
-              <div className="mt-4 w-64 glass px-4 py-2 rounded-full flex items-center gap-3">
-                <ImageIcon className="w-4 h-4 opacity-50" />
-                <input 
-                  value={data.logoUrl} 
-                  onChange={(e) => updateField('logoUrl', e.target.value)}
-                  className="bg-transparent border-none text-[11px] w-full focus:outline-none"
-                  placeholder="Logo URL or /Logo.png"
-                />
-              </div>
-            )}
-          </div>
-
-          <div 
-            className={cn(
-              "relative group/maintitle flex flex-col items-center",
+              "relative group/maintitle flex flex-col items-center w-full max-w-3xl",
               isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
             )}
             onDragOver={(e) => {
@@ -897,7 +879,7 @@ function PortfolioApp() {
             <img 
               src={data.mainTitleImageUrl || undefined} 
               alt={data.studioName}
-              className="h-[168px] md:h-[280px] w-auto object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+              className="w-full h-auto max-h-[400px] md:max-h-[600px] object-contain"
               referrerPolicy="no-referrer"
             />
             
@@ -908,35 +890,7 @@ function PortfolioApp() {
                   value={data.mainTitleImageUrl || ''} 
                   onChange={(e) => updateField('mainTitleImageUrl', e.target.value)}
                   className="bg-transparent border-none text-[11px] w-full focus:outline-none placeholder-white/50"
-                  placeholder="메인 타이틀 이미지 URL"
-                />
-              </div>
-            )}
-          </div>
-          <div 
-            className={cn(
-              "relative group/hanja flex flex-col items-center",
-              isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
-            )}
-            onDragOver={(e) => {
-              if (isEditMode) e.preventDefault();
-            }}
-            onDrop={(e) => handleImageDrop(e, (base64) => updateField('studioNameHanjaUrl', base64))}
-          >
-            <img 
-              src={data.studioNameHanjaUrl || undefined} 
-              alt="不汗黨" 
-              className="h-[80px] md:h-[120px] w-auto object-contain opacity-80"
-              referrerPolicy="no-referrer"
-            />
-            {isEditMode && (
-              <div className="mt-2 w-64 glass px-4 py-2 rounded-full flex items-center gap-3" style={{ textShadow: 'none', letterSpacing: 'normal' }}>
-                <ImageIcon className="w-4 h-4 opacity-50" />
-                <input 
-                  value={data.studioNameHanjaUrl || ''} 
-                  onChange={(e) => updateField('studioNameHanjaUrl', e.target.value)}
-                  className="bg-transparent border-none text-[11px] w-full focus:outline-none placeholder-white/50"
-                  placeholder="한자 이미지 URL 입력 (/bhd.png)"
+                  placeholder="통합 메인 이미지 URL"
                 />
               </div>
             )}
