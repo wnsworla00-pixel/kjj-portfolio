@@ -852,12 +852,12 @@ function PortfolioApp() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="flex flex-col items-center text-center"
+          className="flex flex-col items-center text-center gap-8 md:gap-12"
         >
           {/* Logo Section */}
           <div 
             className={cn(
-              "mb-2 w-full max-w-xl relative group flex flex-col items-center",
+              "w-full max-w-xl relative group flex flex-col items-center",
               isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
             )}
             onDragOver={(e) => {
@@ -950,7 +950,7 @@ function PortfolioApp() {
               </div>
             )}
           </div>
-          <div className="-mt-5 font-light tracking-[0.15em] uppercase ml-[0.15em]" style={getTextStyle('heroSub', 'body')}>
+          <div className="font-light tracking-[0.15em] uppercase ml-[0.15em]" style={getTextStyle('heroSub', 'body')}>
             <EditableText 
               value={data.heroSub || "Lighting Design"} 
               onChange={(v) => updateField('heroSub', v)} 
