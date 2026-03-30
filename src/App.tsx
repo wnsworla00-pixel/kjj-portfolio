@@ -523,11 +523,11 @@ function PortfolioApp() {
     }));
   };
 
-  const addProject = () => {
+  const addProject = (genre?: string) => {
     const newProject: Project = {
       id: Date.now().toString(),
       title: "New Project Title",
-      genre: "Genre",
+      genre: genre || "Genre",
       role: "Role",
       location: "Location",
       year: new Date().getFullYear().toString(),
@@ -627,7 +627,7 @@ function PortfolioApp() {
       </div>
 
       {/* Navbar & Admin Panel */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex flex-col">
+      <div className="fixed top-0 left-0 right-0 z-[110] flex flex-col">
         <nav className="glass border-b-0 px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             {!isVercel && (
@@ -892,7 +892,7 @@ function PortfolioApp() {
             <h2 className="font-sans font-medium" style={getTextStyle('worksTitle', 'h2')}>Portfolio</h2>
             {isEditMode && (
               <button 
-                onClick={addProject}
+                onClick={() => addProject()}
                 className="p-2 glass rounded-full hover:bg-orange-500 transition-colors"
               >
                 <Plus className="w-5 h-5" />
@@ -1016,6 +1016,17 @@ function PortfolioApp() {
                           </div>
                         </div>
                       ))}
+                      
+                      {isEditMode && (
+                        <div 
+                          onClick={() => addProject(genre)}
+                          className="p-4 glass rounded-2xl flex items-center justify-center cursor-pointer glass-hover transition-all hover:bg-orange-500/10 border border-dashed border-white/20 hover:border-orange-500/50 text-white/40 hover:text-orange-500"
+                        >
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <Plus className="w-4 h-4" /> Add Item to {genre}
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -1368,8 +1379,55 @@ function PortfolioApp() {
                 </div>
 
                 {/* Images Grid */}
-                <div className="space-y-8">
-                  <h4 className="text-orange-500 font-mono text-xs tracking-widest uppercase opacity-60">Visuals</h4>
+                <div 
+                  className={cn(
+                    "space-y-8",
+                    isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
+                  )}
+                  onDragOver={(e) => {
+                    if (isEditMode) e.preventDefault();
+                  }}
+                  onDrop={(e) => {
+                    if (!isEditMode) return;
+                    e.preventDefault();
+                    const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+                    if (files.length === 0) return;
+
+                    const newImages = [...(selectedProject.images || [])];
+                    let processedCount = 0;
+
+                    files.forEach(file => {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        if (event.target?.result) {
+                          newImages.push(event.target.result as string);
+                        }
+                        processedCount++;
+                        if (processedCount === files.length) {
+                          updateProject(selectedProject.id, 'images', newImages);
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    });
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-orange-500 font-mono text-xs tracking-widest uppercase opacity-60">Visuals</h4>
+                    {isEditMode && (
+                      <div className="flex items-center gap-4">
+                        <span className="text-[10px] text-white/40 uppercase tracking-widest">Drag & Drop Images Here</span>
+                        <button 
+                          onClick={() => {
+                            const newImages = [...(selectedProject.images || []), ""];
+                            updateProject(selectedProject.id, 'images', newImages);
+                          }}
+                          className="p-2 glass rounded-full hover:bg-orange-500 transition-colors text-white/60 hover:text-white"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {(selectedProject.images || []).map((img, idx) => (
                       <div key={idx} className="space-y-4 group/img">
