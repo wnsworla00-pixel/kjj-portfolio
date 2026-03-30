@@ -253,6 +253,42 @@ export default function App() {
   );
 }
 
+const compressBase64Image = (base64: string, maxWidth = 800, quality = 0.6): Promise<string> => {
+  return new Promise((resolve) => {
+    if (!base64 || !base64.startsWith('data:image/')) {
+      resolve(base64);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > maxWidth) {
+          height *= maxWidth / width;
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxWidth) {
+          width *= maxWidth / height;
+          height = maxWidth;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(img, 0, 0, width, height);
+      
+      resolve(canvas.toDataURL('image/webp', quality));
+    };
+    img.onerror = () => resolve(base64);
+    img.src = base64;
+  });
+};
+
 function PortfolioApp() {
   const [data, setData] = useState<PortfolioData>(() => {
     try {
@@ -310,16 +346,40 @@ function PortfolioApp() {
       return false;
     }
 
-    const jsonString = JSON.stringify(newData);
-    const sizeInBytes = new Blob([jsonString]).size;
+    let dataToSave = { ...newData };
+    let jsonString = JSON.stringify(dataToSave);
+    let sizeInBytes = new Blob([jsonString]).size;
+
     if (sizeInBytes > 900000) { // ~900KB to be safe
+      setIsLoading(true);
+      try {
+        if (dataToSave.logoUrl) dataToSave.logoUrl = await compressBase64Image(dataToSave.logoUrl, 600, 0.5);
+        if (dataToSave.mainTitleImageUrl) dataToSave.mainTitleImageUrl = await compressBase64Image(dataToSave.mainTitleImageUrl, 800, 0.5);
+        if (dataToSave.studioNameHanjaUrl) dataToSave.studioNameHanjaUrl = await compressBase64Image(dataToSave.studioNameHanjaUrl, 600, 0.5);
+        if (dataToSave.designerPhoto) dataToSave.designerPhoto = await compressBase64Image(dataToSave.designerPhoto, 600, 0.5);
+        
+        dataToSave.projects = await Promise.all(dataToSave.projects.map(async (project) => {
+          if (!project.images) return project;
+          const compressedImages = await Promise.all(project.images.map(img => compressBase64Image(img, 600, 0.5)));
+          return { ...project, images: compressedImages };
+        }));
+
+        jsonString = JSON.stringify(dataToSave);
+        sizeInBytes = new Blob([jsonString]).size;
+      } catch (e) {
+        console.error("Compression failed", e);
+      }
+      setIsLoading(false);
+    }
+
+    if (sizeInBytes > 900000) {
       alert(`데이터 용량이 너무 큽니다! (현재: ${(sizeInBytes / 1024 / 1024).toFixed(2)}MB / 최대: 1MB)\n\nFirebase Firestore의 문서 용량 제한(1MB)을 초과했습니다. 이미지를 삭제하거나 외부 이미지 링크(URL)를 사용해주세요.`);
       return false;
     }
 
     const path = 'portfolios/main';
     try {
-      await setDoc(doc(db, path), newData);
+      await setDoc(doc(db, path), dataToSave);
       alert("성공적으로 저장되었습니다.");
       return true;
     } catch (error) {
@@ -579,8 +639,8 @@ function PortfolioApp() {
           const img = new Image();
           img.onload = () => {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 800;
-            const MAX_HEIGHT = 800;
+            const MAX_WIDTH = 600;
+            const MAX_HEIGHT = 600;
             let width = img.width;
             let height = img.height;
 
@@ -602,7 +662,7 @@ function PortfolioApp() {
             ctx?.drawImage(img, 0, 0, width, height);
             
             // Use webp to preserve transparency while compressing
-            resolve(canvas.toDataURL('image/webp', 0.8));
+            resolve(canvas.toDataURL('image/webp', 0.6));
           };
           img.onerror = reject;
           img.src = event.target?.result as string;
@@ -1475,8 +1535,8 @@ function PortfolioApp() {
                             const img = new Image();
                             img.onload = () => {
                               const canvas = document.createElement('canvas');
-                              const MAX_WIDTH = 800;
-                              const MAX_HEIGHT = 800;
+                              const MAX_WIDTH = 600;
+                              const MAX_HEIGHT = 600;
                               let width = img.width;
                               let height = img.height;
 
@@ -1498,7 +1558,7 @@ function PortfolioApp() {
                               ctx?.drawImage(img, 0, 0, width, height);
                               
                               // Use webp to preserve transparency while compressing
-                              resolve(canvas.toDataURL('image/webp', 0.8));
+                              resolve(canvas.toDataURL('image/webp', 0.6));
                             };
                             img.onerror = reject;
                             img.src = event.target?.result as string;
