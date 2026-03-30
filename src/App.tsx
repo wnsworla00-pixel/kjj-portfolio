@@ -13,6 +13,7 @@ import {
   Plus, 
   Trash2,
   ChevronRight,
+  ChevronDown,
   Lightbulb,
   ArrowLeft,
   Image as ImageIcon,
@@ -319,6 +320,7 @@ function PortfolioApp() {
     }
   }, [isEditMode, data]);
   const [expandedGenre, setExpandedGenre] = useState<string | null>(null);
+  const [expandedYears, setExpandedYears] = useState<Record<string, boolean>>({});
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
@@ -683,7 +685,7 @@ function PortfolioApp() {
       genre: genre || "Genre",
       role: "Role",
       location: "Location",
-      year: new Date().getFullYear().toString(),
+      year: "2000",
       images: []
     };
     setData(prev => ({ ...prev, projects: [newProject, ...prev.projects] }));
@@ -1077,69 +1079,124 @@ function PortfolioApp() {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden space-y-3 pl-4 border-l border-white/10 ml-4"
                     >
-                      {groupedProjects[genre].map((project) => (
-                        <div key={project.id} className="space-y-3">
-                          <div 
-                            onClick={() => !isEditMode && setSelectedProjectId(project.id)}
-                            className={cn(
-                              "p-4 glass rounded-2xl flex items-center justify-center relative cursor-pointer glass-hover transition-all hover:bg-orange-500/10 border-transparent hover:border-orange-500/30",
-                              isEditMode && "cursor-default"
-                            )}
-                          >
-                            <div className="flex flex-col items-center text-center gap-1">
-                              <span className="text-orange-500 font-mono text-[10px] tracking-widest" style={getTextStyle(`projects.${project.id}.year`, 'accent')}>
-                                <EditableText 
-                                  value={project.year} 
-                                  onChange={(v) => updateProject(project.id, 'year', v)} 
-                                  isEditMode={isEditMode}
-                                  path={`projects.${project.id}.year`}
-                                  selectedPath={selectedPath}
-                                  onSelect={setSelectedPath}
-                                  style={getTextStyle(`projects.${project.id}.year`, 'accent')}
-                                />
-                              </span>
-                              <h4 className="font-sans font-medium" style={getTextStyle(`projects.${project.id}.title`, 'body')}>
-                                <EditableText 
-                                  value={project.title} 
-                                  onChange={(v) => updateProject(project.id, 'title', v)} 
-                                  isEditMode={isEditMode}
-                                  path={`projects.${project.id}.title`}
-                                  selectedPath={selectedPath}
-                                  onSelect={setSelectedPath}
-                                  style={getTextStyle(`projects.${project.id}.title`, 'body')}
-                                />
-                              </h4>
+                      {(() => {
+                        const projectsByYear = groupedProjects[genre].reduce((acc, project) => {
+                          const year = project.year || "Unknown";
+                          if (!acc[year]) acc[year] = [];
+                          acc[year].push(project);
+                          return acc;
+                        }, {} as Record<string, Project[]>);
+                        
+                        const allYears = Array.from(new Set([...Object.keys(projectsByYear), "2026", "2025", "2024", "2023", "2022"])).sort((a, b) => b.localeCompare(a));
+
+                        return allYears.map(year => {
+                          const yearProjects = projectsByYear[year] || [];
+                          if (!isEditMode && yearProjects.length === 0) return null;
+
+                          const yearKey = `${genre}-${year}`;
+                          const isYearExpanded = expandedYears[yearKey];
+
+                          return (
+                            <div key={year} className="space-y-3 mb-6">
+                              <div 
+                                onClick={() => setExpandedYears(prev => ({ ...prev, [yearKey]: !prev[yearKey] }))}
+                                className="flex items-center justify-between py-2 px-4 glass rounded-xl cursor-pointer hover:bg-white/5 transition-colors border border-white/5"
+                              >
+                                <span className="text-orange-500 font-mono text-[11px] tracking-widest opacity-80">{year}</span>
+                                <motion.div
+                                  animate={{ rotate: isYearExpanded ? 180 : 0 }}
+                                  transition={{ duration: 0.3 }}
+                                >
+                                  <ChevronDown className="w-4 h-4 text-orange-500/50" />
+                                </motion.div>
+                              </div>
+                              
+                              <AnimatePresence>
+                                {isYearExpanded && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden"
+                                  >
+                                    {yearProjects.length === 0 ? (
+                                      isEditMode && (
+                                        <div className="text-white/20 text-[10px] italic pl-4 py-2">No projects in {year}</div>
+                                      )
+                                    ) : (
+                                      <div className="space-y-3 pl-2 pt-2 pb-2">
+                                        {yearProjects.map((project) => (
+                                          <div key={project.id} className="space-y-3">
+                                            <div 
+                                              onClick={() => !isEditMode && setSelectedProjectId(project.id)}
+                                              className={cn(
+                                                "p-4 glass rounded-2xl flex items-center justify-center relative cursor-pointer glass-hover transition-all hover:bg-orange-500/10 border-transparent hover:border-orange-500/30",
+                                                isEditMode && "cursor-default"
+                                              )}
+                                            >
+                                              <div className="flex flex-col items-center text-center gap-1">
+                                                <span className="text-orange-500 font-mono text-[10px] tracking-widest" style={getTextStyle(`projects.${project.id}.year`, 'accent')}>
+                                                  <EditableText 
+                                                    value={project.year} 
+                                                    onChange={(v) => updateProject(project.id, 'year', v)} 
+                                                    isEditMode={isEditMode}
+                                                    path={`projects.${project.id}.year`}
+                                                    selectedPath={selectedPath}
+                                                    onSelect={setSelectedPath}
+                                                    style={getTextStyle(`projects.${project.id}.year`, 'accent')}
+                                                  />
+                                                </span>
+                                                <h4 className="font-sans font-medium" style={getTextStyle(`projects.${project.id}.title`, 'body')}>
+                                                  <EditableText 
+                                                    value={project.title} 
+                                                    onChange={(v) => updateProject(project.id, 'title', v)} 
+                                                    isEditMode={isEditMode}
+                                                    path={`projects.${project.id}.title`}
+                                                    selectedPath={selectedPath}
+                                                    onSelect={setSelectedPath}
+                                                    style={getTextStyle(`projects.${project.id}.title`, 'body')}
+                                                  />
+                                                </h4>
+                                              </div>
+                                              
+                                              {!isEditMode && (
+                                                <div className="absolute right-4 opacity-20 group-hover:opacity-100 transition-opacity">
+                                                  <ChevronRight className="w-4 h-4" />
+                                                </div>
+                                              )}
+                                              
+                                              {isEditMode && (
+                                                <div className="absolute right-4 flex items-center gap-2">
+                                                  <button 
+                                                    onClick={() => setSelectedProjectId(project.id)}
+                                                    className="p-1.5 glass rounded-lg hover:bg-orange-500 transition-colors"
+                                                    title="Edit Details"
+                                                  >
+                                                    <Maximize className="w-3 h-3" />
+                                                  </button>
+                                                  <button 
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      removeProject(project.id);
+                                                    }}
+                                                    className="p-1.5 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
+                                                  >
+                                                    <Trash2 className="w-3 h-3" />
+                                                  </button>
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
                             </div>
-                            
-                            {!isEditMode && (
-                              <div className="absolute right-4 opacity-20 group-hover:opacity-100 transition-opacity">
-                                <ChevronRight className="w-4 h-4" />
-                              </div>
-                            )}
-                            
-                            {isEditMode && (
-                              <div className="absolute right-4 flex items-center gap-2">
-                                <button 
-                                  onClick={() => setSelectedProjectId(project.id)}
-                                  className="p-1.5 glass rounded-lg hover:bg-orange-500 transition-colors"
-                                  title="Edit Details"
-                                >
-                                  <Maximize className="w-3 h-3" />
-                                </button>
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    removeProject(project.id);
-                                  }}
-                                  className="p-1.5 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                          );
+                        });
+                      })()}
                       
                       {isEditMode && (
                         <div 
