@@ -598,7 +598,8 @@ function PortfolioApp() {
             const ctx = canvas.getContext('2d');
             ctx?.drawImage(img, 0, 0, width, height);
             
-            resolve(canvas.toDataURL('image/jpeg', 0.6));
+            // Use webp to preserve transparency while compressing
+            resolve(canvas.toDataURL('image/webp', 0.8));
           };
           img.onerror = reject;
           img.src = event.target?.result as string;
@@ -1551,8 +1552,8 @@ function PortfolioApp() {
                               const ctx = canvas.getContext('2d');
                               ctx?.drawImage(img, 0, 0, width, height);
                               
-                              // Compress to JPEG with 0.6 quality to save space
-                              resolve(canvas.toDataURL('image/jpeg', 0.6));
+                              // Use webp to preserve transparency while compressing
+                              resolve(canvas.toDataURL('image/webp', 0.8));
                             };
                             img.onerror = reject;
                             img.src = event.target?.result as string;
