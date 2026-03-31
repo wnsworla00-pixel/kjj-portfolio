@@ -633,7 +633,7 @@ function PortfolioApp() {
     });
   };
 
-  const getTextStyle = (path: string, type?: 'h1' | 'h2' | 'body' | 'accent') => {
+  const getTextStyle = (path: string, type?: 'h1' | 'h2' | 'h3' | 'body' | 'accent') => {
     const custom = data.textStyles?.[path];
     if (custom) {
       return { fontSize: `${custom.size}pt`, color: custom.color, opacity: custom.opacity };
@@ -643,6 +643,7 @@ function PortfolioApp() {
     const defaults: Record<string, any> = {
       h1: { size: 72, color: "#FFFFFF", opacity: 1 },
       h2: { size: 15, color: "#FFFFFF", opacity: 1 },
+      h3: { size: 13, color: "#FFFFFF", opacity: 1 },
       body: { size: 13, color: "#FFFFFF", opacity: 1 },
       accent: { size: 12, color: "#f97316", opacity: 0.8 }
     };
@@ -1084,7 +1085,7 @@ function PortfolioApp() {
                     expandedGenre === genre && "ring-1 ring-orange-500/30 bg-white/5"
                   )}
                 >
-                  <h3 className="font-sans text-white/60 group-hover:text-orange-500 transition-colors uppercase tracking-tight font-medium" style={getTextStyle(`genre.${genre}`, 'h2')}>
+                  <h3 className="font-sans text-white/60 group-hover:text-orange-500 transition-colors uppercase tracking-tight font-medium" style={getTextStyle(`genre.${genre}`, 'h3')}>
                     <EditableText 
                       value={genre} 
                       onChange={(v) => {
@@ -1097,7 +1098,7 @@ function PortfolioApp() {
                       path={`genre.${genre}`}
                       selectedPath={selectedPath}
                       onSelect={setSelectedPath}
-                      style={getTextStyle(`genre.${genre}`, 'h2')}
+                      style={getTextStyle(`genre.${genre}`, 'h3')}
                     />
                   </h3>
                   <motion.div
