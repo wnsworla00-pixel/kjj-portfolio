@@ -1685,13 +1685,13 @@ function PortfolioApp() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowDesignerPhotoModal(false)}
-            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-12 cursor-pointer"
+            className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-xl flex items-center justify-center p-4 md:p-12 cursor-pointer"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative max-w-5xl max-h-full"
+              className="relative max-w-sm max-h-full"
             >
               <img 
                 src={data.designerPhoto || undefined} 
@@ -1719,7 +1719,7 @@ function PortfolioApp() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
           >
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setSelectedProjectId(null)} />
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-md" onClick={() => setSelectedProjectId(null)} />
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
