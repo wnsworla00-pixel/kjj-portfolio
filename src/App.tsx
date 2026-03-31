@@ -1420,12 +1420,12 @@ function PortfolioApp() {
 
       {/* 03. About Section (Swapped) */}
       <section className="relative py-16 px-6 max-w-7xl mx-auto z-10">
-        <div className="space-y-12">
+        <div className="space-y-12 flex flex-col items-center">
           <div className="inline-block px-4 py-1 glass rounded-full tracking-widest uppercase font-sans font-medium" style={getTextStyle('aboutLabel', 'accent')}>
             03. About Designer
           </div>
           
-          <div className="grid grid-cols-[0.4fr_1.6fr] gap-4 md:gap-20 items-center">
+          <div className="grid grid-cols-[0.6fr_1.4fr] md:grid-cols-[0.4fr_1.6fr] gap-6 md:gap-20 items-center w-full">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -1577,7 +1577,8 @@ function PortfolioApp() {
                 </div>
               </div>
               <div className="space-y-6">
-                <div className="font-light leading-relaxed opacity-60 max-w-xl border-l-2 border-orange-500 pl-6" style={getTextStyle('about.description', 'body')}>
+                <div className="relative font-light leading-relaxed opacity-60 max-w-xl pl-6" style={getTextStyle('about.description', 'body')}>
+                  <div className="absolute left-0 top-0 w-[2px] h-1/2 bg-orange-500" />
                   <EditableText 
                     value={data.about.description} 
                     onChange={(v) => updateField('about.description', v)} 
