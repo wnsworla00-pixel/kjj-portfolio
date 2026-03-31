@@ -1425,13 +1425,13 @@ function PortfolioApp() {
             03. About Designer
           </div>
           
-          <div className="grid grid-cols-[0.6fr_1.4fr] md:grid-cols-[0.4fr_1.6fr] gap-6 md:gap-20 items-center w-full">
+          <div className="grid grid-cols-[0.6fr_1.4fr] md:grid-cols-[0.4fr_1.6fr] gap-x-6 md:gap-x-20 gap-y-8 md:gap-y-10 items-center w-full">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               className={cn(
-                "relative group",
+                "relative group md:row-span-2",
                 isEditMode && "p-4 border border-dashed border-white/10 rounded-[40px] hover:border-orange-500/30 transition-colors"
               )}
               onDragOver={(e) => {
@@ -1487,109 +1487,108 @@ function PortfolioApp() {
               )}
             </motion.div>
 
-            <div className="space-y-10">
-              <div className="space-y-4">
-                <div className="text-orange-500 font-mono tracking-[0.2em] uppercase" style={getTextStyle('about.role', 'accent')}>
+            <div className="space-y-4">
+              <div className="text-orange-500 font-mono tracking-[0.2em] uppercase" style={getTextStyle('about.role', 'accent')}>
+                <EditableText 
+                  value={data.about.role} 
+                  onChange={(v) => updateField('about.role', v)} 
+                  isEditMode={isEditMode}
+                  path="about.role"
+                  selectedPath={selectedPath}
+                  onSelect={setSelectedPath}
+                  style={getTextStyle('about.role', 'accent')}
+                />
+              </div>
+              <div className="flex items-baseline gap-1 flex-wrap">
+                <h2 className="font-sans tracking-tight font-medium">
                   <EditableText 
-                    value={data.about.role} 
-                    onChange={(v) => updateField('about.role', v)} 
+                    value={data.about.name} 
+                    onChange={(v) => updateField('about.name', v)} 
                     isEditMode={isEditMode}
-                    path="about.role"
+                    path="about.name"
                     selectedPath={selectedPath}
                     onSelect={setSelectedPath}
-                    style={getTextStyle('about.role', 'accent')}
+                    style={getTextStyle('about.name', 'h1')}
+                  />
+                </h2>
+                <div className="font-sans tracking-tight font-medium">
+                  <EditableText 
+                    value={data.about.englishName || ""} 
+                    onChange={(v) => updateField('about.englishName', v)} 
+                    isEditMode={isEditMode}
+                    path="about.englishName"
+                    selectedPath={selectedPath}
+                    onSelect={setSelectedPath}
+                    style={getTextStyle('about.englishName', 'h2')}
                   />
                 </div>
-                <div className="flex items-baseline gap-1 flex-wrap">
-                  <h2 className="font-sans tracking-tight font-medium">
+              </div>
+              {/* Education Items (Moved under role) */}
+              <div className="font-light text-white/40 space-y-1 -mt-2" style={getTextStyle('about.education', 'accent')}>
+                {(data.about.education || []).map((edu, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
                     <EditableText 
-                      value={data.about.name} 
-                      onChange={(v) => updateField('about.name', v)} 
-                      isEditMode={isEditMode}
-                      path="about.name"
-                      selectedPath={selectedPath}
-                      onSelect={setSelectedPath}
-                      style={getTextStyle('about.name', 'h1')}
-                    />
-                  </h2>
-                  <div className="font-sans tracking-tight font-medium">
-                    <EditableText 
-                      value={data.about.englishName || ""} 
-                      onChange={(v) => updateField('about.englishName', v)} 
-                      isEditMode={isEditMode}
-                      path="about.englishName"
-                      selectedPath={selectedPath}
-                      onSelect={setSelectedPath}
-                      style={getTextStyle('about.englishName', 'h2')}
-                    />
-                  </div>
-                </div>
-                {/* Education Items (Moved under role) */}
-                <div className="font-light text-white/40 space-y-1 -mt-2" style={getTextStyle('about.education', 'accent')}>
-                  {(data.about.education || []).map((edu, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <EditableText 
-                        value={edu} 
-                        onChange={(v) => {
-                          const newEdu = [...(data.about.education || [])];
-                          newEdu[idx] = v;
-                          setData(prev => ({
-                            ...prev,
-                            about: { ...prev.about, education: newEdu }
-                          }));
-                        }} 
-                        isEditMode={isEditMode}
-                        path={`about.education.${idx}`}
-                        selectedPath={selectedPath}
-                        onSelect={setSelectedPath}
-                        style={getTextStyle(`about.education.${idx}`, 'accent')}
-                      />
-                      {isEditMode && (
-                        <button 
-                          onClick={() => {
-                            const newEdu = (data.about.education || []).filter((_, i) => i !== idx);
-                            setData(prev => ({
-                              ...prev,
-                              about: { ...prev.about, education: newEdu }
-                            }));
-                          }}
-                          className="p-1 hover:text-red-500 transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  {isEditMode && (
-                    <button 
-                      onClick={() => {
-                        const newEdu = [...(data.about.education || []), "New Education Item"];
+                      value={edu} 
+                      onChange={(v) => {
+                        const newEdu = [...(data.about.education || [])];
+                        newEdu[idx] = v;
                         setData(prev => ({
                           ...prev,
                           about: { ...prev.about, education: newEdu }
                         }));
-                      }}
-                      className="flex items-center gap-2 text-[10px] text-white/30 hover:text-white/60 transition-colors mt-1"
-                    >
-                      <Plus className="w-2 h-2" /> Add Item
-                    </button>
-                  )}
-                </div>
+                      }} 
+                      isEditMode={isEditMode}
+                      path={`about.education.${idx}`}
+                      selectedPath={selectedPath}
+                      onSelect={setSelectedPath}
+                      style={getTextStyle(`about.education.${idx}`, 'accent')}
+                    />
+                    {isEditMode && (
+                      <button 
+                        onClick={() => {
+                          const newEdu = (data.about.education || []).filter((_, i) => i !== idx);
+                          setData(prev => ({
+                            ...prev,
+                            about: { ...prev.about, education: newEdu }
+                          }));
+                        }}
+                        className="p-1 hover:text-red-500 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {isEditMode && (
+                  <button 
+                    onClick={() => {
+                      const newEdu = [...(data.about.education || []), "New Education Item"];
+                      setData(prev => ({
+                        ...prev,
+                        about: { ...prev.about, education: newEdu }
+                      }));
+                    }}
+                    className="flex items-center gap-2 text-[10px] text-white/30 hover:text-white/60 transition-colors mt-1"
+                  >
+                    <Plus className="w-2 h-2" /> Add Item
+                  </button>
+                )}
               </div>
-              <div className="space-y-6">
-                <div className="relative font-light leading-relaxed opacity-60 max-w-xl pl-6" style={getTextStyle('about.description', 'body')}>
-                  <div className="absolute left-0 top-0 w-[2px] h-1/2 bg-orange-500" />
-                  <EditableText 
-                    value={data.about.description} 
-                    onChange={(v) => updateField('about.description', v)} 
-                    multiline
-                    isEditMode={isEditMode}
-                    path="about.description"
-                    selectedPath={selectedPath}
-                    onSelect={setSelectedPath}
-                    style={getTextStyle('about.description', 'body')}
-                  />
-                </div>
+            </div>
+
+            <div className="col-span-2 md:col-span-1 md:col-start-2 space-y-6">
+              <div className="relative font-light leading-relaxed opacity-60 max-w-xl pl-6" style={getTextStyle('about.description', 'body')}>
+                <div className="absolute left-0 top-0 w-[2px] h-1/2 bg-orange-500" />
+                <EditableText 
+                  value={data.about.description} 
+                  onChange={(v) => updateField('about.description', v)} 
+                  multiline
+                  isEditMode={isEditMode}
+                  path="about.description"
+                  selectedPath={selectedPath}
+                  onSelect={setSelectedPath}
+                  style={getTextStyle('about.description', 'body')}
+                />
               </div>
             </div>
           </div>
