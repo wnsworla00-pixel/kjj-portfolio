@@ -1225,7 +1225,7 @@ function PortfolioApp() {
             02. Works
           </div>
           <div className="flex items-center gap-4">
-            <h2 className="font-sans font-medium" style={getTextStyle('worksTitle', 'h2')}>Portfolio</h2>
+            <h2 className="font-sans font-medium hidden md:block" style={getTextStyle('worksTitle', 'h2')}>Portfolio</h2>
             {isEditMode && (
               <button 
                 onClick={() => addProject()}
