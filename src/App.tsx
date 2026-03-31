@@ -346,6 +346,7 @@ function PortfolioApp() {
   const [expandedYears, setExpandedYears] = useState<Record<string, boolean>>({});
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showDesignerPhotoModal, setShowDesignerPhotoModal] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
@@ -769,8 +770,8 @@ function PortfolioApp() {
           const img = new Image();
           img.onload = () => {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 600;
-            const MAX_HEIGHT = 600;
+            const MAX_WIDTH = 1200;
+            const MAX_HEIGHT = 1200;
             let width = img.width;
             let height = img.height;
 
@@ -792,7 +793,7 @@ function PortfolioApp() {
             ctx?.drawImage(img, 0, 0, width, height);
             
             // Use webp to preserve transparency while compressing
-            resolve(canvas.toDataURL('image/webp', 0.6));
+            resolve(canvas.toDataURL('image/webp', 0.8));
           };
           img.onerror = reject;
           img.src = event.target?.result as string;
@@ -1424,7 +1425,7 @@ function PortfolioApp() {
             03. About Designer
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-[0.4fr_1.6fr] gap-12 md:gap-20 items-center">
+          <div className="grid grid-cols-[0.4fr_1.6fr] gap-4 md:gap-20 items-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -1438,7 +1439,13 @@ function PortfolioApp() {
               }}
               onDrop={(e) => handleImageDrop(e, (base64) => updateField('designerPhoto', base64))}
             >
-              <div className="aspect-[3/4] glass rounded-[32px] overflow-hidden relative shadow-2xl">
+              <div 
+                onClick={() => !isEditMode && setShowDesignerPhotoModal(true)}
+                className={cn(
+                  "aspect-[3/4] glass rounded-[24px] md:rounded-[32px] overflow-hidden relative shadow-2xl",
+                  !isEditMode && "cursor-pointer"
+                )}
+              >
                 <img 
                   src={data.designerPhoto || undefined} 
                   alt="Designer" 
@@ -1669,6 +1676,39 @@ function PortfolioApp() {
           </div>
         </div>
       </footer>
+
+      {/* Designer Photo Modal */}
+      <AnimatePresence>
+        {showDesignerPhotoModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowDesignerPhotoModal(false)}
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-12 cursor-pointer"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-w-5xl max-h-full"
+            >
+              <img 
+                src={data.designerPhoto || undefined} 
+                alt="Designer Full"
+                className="w-full h-full object-contain rounded-2xl shadow-2xl"
+                referrerPolicy="no-referrer"
+              />
+              <button 
+                onClick={() => setShowDesignerPhotoModal(false)}
+                className="absolute top-4 right-4 p-3 glass rounded-full hover:bg-white/10 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Project Details Modal */}
       <AnimatePresence>
