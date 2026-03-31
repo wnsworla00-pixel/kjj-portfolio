@@ -731,21 +731,31 @@ function PortfolioApp() {
 
   const getTextStyle = (path: string, type?: 'h1' | 'h2' | 'h3' | 'body' | 'accent') => {
     const custom = data.textStyles?.[path];
+    let size = 12;
+    let color = "#FFFFFF";
+    let opacity = 1;
+
     if (custom) {
-      return { fontSize: `${custom.size}pt`, color: custom.color, opacity: custom.opacity };
+      size = custom.size;
+      color = custom.color;
+      opacity = custom.opacity;
+    } else {
+      const defaults: Record<string, any> = {
+        h1: { size: 72, color: "#FFFFFF", opacity: 1 },
+        h2: { size: 15, color: "#FFFFFF", opacity: 1 },
+        h3: { size: 13, color: "#FFFFFF", opacity: 1 },
+        body: { size: 13, color: "#FFFFFF", opacity: 1 },
+        accent: { size: 12, color: "#f97316", opacity: 0.8 }
+      };
+      const s = type ? defaults[type] : defaults.body;
+      size = s.size;
+      color = s.color;
+      opacity = s.opacity;
     }
     
-    // Fallback to defaults if no custom style
-    const defaults: Record<string, any> = {
-      h1: { size: 72, color: "#FFFFFF", opacity: 1 },
-      h2: { size: 15, color: "#FFFFFF", opacity: 1 },
-      h3: { size: 13, color: "#FFFFFF", opacity: 1 },
-      body: { size: 13, color: "#FFFFFF", opacity: 1 },
-      accent: { size: 12, color: "#f97316", opacity: 0.8 }
-    };
-    
-    const s = type ? defaults[type] : defaults.body;
-    return { fontSize: `${s.size}pt`, color: s.color, opacity: s.opacity };
+    const isLabel = path.toLowerCase().includes('label');
+    const fontSize = isLabel ? `calc(${size}pt * var(--label-scale, 1))` : `${size}pt`;
+    return { fontSize, color, opacity };
   };
 
   const updateProject = (id: string, field: keyof Project, value: any) => {
@@ -1425,7 +1435,7 @@ function PortfolioApp() {
             03. About Designer
           </div>
           
-          <div className="grid grid-cols-[0.6fr_1.4fr] md:grid-cols-[0.4fr_1.6fr] gap-x-6 md:gap-x-20 gap-y-8 md:gap-y-10 items-center w-full">
+          <div className="grid grid-cols-[0.6fr_1.4fr] md:grid-cols-[0.4fr_1.6fr] gap-x-6 md:gap-x-20 gap-y-8 md:gap-y-4 items-start w-full">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -1576,9 +1586,9 @@ function PortfolioApp() {
               </div>
             </div>
 
-            <div className="col-span-2 md:col-span-1 md:col-start-2 space-y-6">
+            <div className="col-span-2 md:col-span-1 md:col-start-2 space-y-6 md:-mt-8">
               <div className="relative font-light leading-relaxed opacity-60 max-w-xl pl-6" style={getTextStyle('about.description', 'body')}>
-                <div className="absolute left-0 top-0 w-[2px] h-1/2 bg-orange-500" />
+                <div className="absolute left-0 top-0 w-[2px] h-[80%] bg-orange-500" />
                 <EditableText 
                   value={data.about.description} 
                   onChange={(v) => updateField('about.description', v)} 
@@ -1597,22 +1607,22 @@ function PortfolioApp() {
 
 
       {/* 04. Contact Section */}
-      <section className="relative py-32 px-6 max-w-7xl mx-auto z-10">
-        <div className="glass rounded-[40px] p-12 md:p-20 flex flex-col items-center text-center space-y-12 overflow-hidden relative">
+      <section className="relative py-12 md:py-32 px-6 max-w-7xl mx-auto z-10">
+        <div className="glass rounded-[32px] md:rounded-[40px] p-6 md:p-20 flex flex-col items-center text-center space-y-6 md:space-y-12 overflow-hidden relative">
           <div className="atmosphere absolute inset-0 opacity-20 scale-150" />
           
-          <div className="relative z-10 space-y-4">
-            <div className="inline-block px-4 py-1 glass rounded-full tracking-widest uppercase mb-4 font-sans font-medium" style={getTextStyle('contactLabel', 'accent')}>
+          <div className="relative z-10 space-y-2 md:space-y-4">
+            <div className="inline-block px-4 py-1 glass rounded-full tracking-widest uppercase mb-2 md:mb-4 font-sans font-medium" style={getTextStyle('contactLabel', 'accent')}>
               04. Contact
             </div>
           </div>
 
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl">
-            <a href={`mailto:${data.contact.email}`} className="glass glass-hover p-8 rounded-3xl flex flex-col items-center gap-4 group">
-              <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
-                <Mail className="w-6 h-6" />
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 w-full max-w-4xl">
+            <a href={`mailto:${data.contact.email}`} className="glass glass-hover p-4 md:p-8 rounded-2xl md:rounded-3xl flex flex-col items-center gap-2 md:gap-4 group">
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+                <Mail className="w-4 h-4 md:w-6 md:h-6" />
               </div>
-              <div className="font-light opacity-60" style={getTextStyle('contact.email', 'body')}>
+              <div className="font-light opacity-60 text-xs md:text-base" style={getTextStyle('contact.email', 'body')}>
                 <EditableText 
                   value={data.contact.email} 
                   onChange={(v) => updateField('contact.email', v)} 
@@ -1624,11 +1634,11 @@ function PortfolioApp() {
                 />
               </div>
             </a>
-            <a href={`https://instagram.com/${data.contact.instagram.replace('@', '')}`} target="_blank" className="glass glass-hover p-8 rounded-3xl flex flex-col items-center gap-4 group">
-              <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
-                <Instagram className="w-6 h-6" />
+            <a href={`https://instagram.com/${data.contact.instagram.replace('@', '')}`} target="_blank" className="glass glass-hover p-4 md:p-8 rounded-2xl md:rounded-3xl flex flex-col items-center gap-2 md:gap-4 group">
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+                <Instagram className="w-4 h-4 md:w-6 md:h-6" />
               </div>
-              <div className="font-light opacity-60" style={getTextStyle('contact.instagram', 'body')}>
+              <div className="font-light opacity-60 text-xs md:text-base" style={getTextStyle('contact.instagram', 'body')}>
                 <EditableText 
                   value={data.contact.instagram} 
                   onChange={(v) => updateField('contact.instagram', v)} 
@@ -1640,11 +1650,11 @@ function PortfolioApp() {
                 />
               </div>
             </a>
-            <a href={`tel:${data.contact.phone.replace(/\s/g, '')}`} className="glass glass-hover p-8 rounded-3xl flex flex-col items-center gap-4 group">
-              <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
-                <Phone className="w-6 h-6" />
+            <a href={`tel:${data.contact.phone.replace(/\s/g, '')}`} className="glass glass-hover p-4 md:p-8 rounded-2xl md:rounded-3xl flex flex-col items-center gap-2 md:gap-4 group">
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+                <Phone className="w-4 h-4 md:w-6 md:h-6" />
               </div>
-              <div className="font-light opacity-60" style={getTextStyle('contact.phone', 'body')}>
+              <div className="font-light opacity-60 text-xs md:text-base" style={getTextStyle('contact.phone', 'body')}>
                 <EditableText 
                   value={data.contact.phone} 
                   onChange={(v) => updateField('contact.phone', v)} 
