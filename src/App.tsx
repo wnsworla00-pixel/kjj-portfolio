@@ -1224,17 +1224,14 @@ function PortfolioApp() {
           <div className="inline-block px-4 py-1 glass rounded-full tracking-widest uppercase mb-6 font-sans font-medium" style={getTextStyle('worksLabel', 'accent')}>
             02. Works
           </div>
-          <div className="flex items-center gap-4">
-            <h2 className="font-sans font-medium hidden md:block" style={getTextStyle('worksTitle', 'h2')}>Portfolio</h2>
-            {isEditMode && (
-              <button 
-                onClick={() => addProject()}
-                className="p-2 glass rounded-full hover:bg-orange-500 transition-colors"
-              >
-                <Plus className="w-5 h-5" />
-              </button>
-            )}
-          </div>
+          {isEditMode && (
+            <button 
+              onClick={() => addProject()}
+              className="p-2 glass rounded-full hover:bg-orange-500 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         <div className="space-y-6 max-w-2xl mx-auto">
