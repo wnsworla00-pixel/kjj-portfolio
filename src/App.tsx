@@ -26,7 +26,9 @@ import {
   Upload,
   LogIn,
   LogOut,
-  AlertCircle
+  AlertCircle,
+  RefreshCw,
+  Link as LinkIcon
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { cn } from './lib/utils';
@@ -594,14 +596,21 @@ function PortfolioApp() {
       if (snapshot.exists()) {
         const remoteData = snapshot.data() as PortfolioData;
         setData(prev => {
-          if (isEditModeRef.current) return prev;
-          return {
+          // If we are in edit mode AND we have actual modified data (not just initial), keep it
+          const isInitial = JSON.stringify(prev.projects) === JSON.stringify(INITIAL_DATA.projects);
+          if (isEditModeRef.current && !isInitial) return prev;
+          
+          const merged = {
             ...INITIAL_DATA,
             ...remoteData,
             style: { ...INITIAL_DATA.style, ...(remoteData.style || {}) },
             fonts: { ...INITIAL_DATA.fonts, ...(remoteData.fonts || {}) },
             textStyles: { ...INITIAL_DATA.textStyles, ...(remoteData.textStyles || {}) }
           };
+          
+          // Sync display projects when loading from server
+          setDisplayProjects(merged.projects);
+          return merged;
         });
       }
       setIsLoading(false);
@@ -618,6 +627,92 @@ function PortfolioApp() {
     document.documentElement.style.setProperty('--font-sans', data.fonts.sans);
     document.documentElement.style.setProperty('--font-serif', data.fonts.serif);
   }, [data.fonts]);
+
+  // Migration for Google Drive links
+  useEffect(() => {
+    if (isLoading) return;
+    
+    let changed = false;
+    const newData = JSON.parse(JSON.stringify(data));
+
+    if (newData.designerPhoto && newData.designerPhoto.includes('drive.google.com') && !newData.designerPhoto.includes('uc?export=view')) {
+      newData.designerPhoto = formatImageUrl(newData.designerPhoto);
+      changed = true;
+    }
+
+    newData.projects = newData.projects.map((p: Project) => {
+      const newImages = p.images?.map(img => {
+        if (img && img.includes('drive.google.com') && !img.includes('uc?export=view')) {
+          changed = true;
+          return formatImageUrl(img);
+        }
+        return img;
+      });
+      return { ...p, images: newImages };
+    });
+
+    if (changed) {
+      setData(newData);
+      setDisplayProjects(newData.projects);
+    }
+  }, [isLoading]);
+
+  const [currentSize, setCurrentSize] = useState(0);
+  const [bulkUrls, setBulkUrls] = useState("");
+  const [showBulkInput, setShowBulkInput] = useState(false);
+
+  const fixAllDriveLinks = () => {
+    let count = 0;
+    const newData = JSON.parse(JSON.stringify(data));
+    
+    const fix = (url: string) => {
+      if (url && url.includes('drive.google.com') && !url.includes('lh3.googleusercontent.com')) {
+        const fixed = formatImageUrl(url);
+        if (fixed !== url) {
+          count++;
+          return fixed;
+        }
+      }
+      return url;
+    };
+
+    if (newData.designerPhoto) {
+      const fixed = fix(newData.designerPhoto);
+      if (fixed !== newData.designerPhoto) {
+        newData.designerPhoto = fixed;
+      }
+    }
+    
+    newData.projects = newData.projects.map((p: Project) => ({
+      ...p,
+      images: p.images?.map(fix)
+    }));
+
+    if (count > 0) {
+      setData(newData);
+      setDisplayProjects(newData.projects);
+      alert(`${count}개의 구글 드라이브 링크가 이미지 전용 주소로 복구되었습니다. [Save to Cloud]를 눌러 저장해 주세요.`);
+    } else {
+      alert("이미 모든 링크가 최적화되어 있거나 수정할 링크가 없습니다.");
+    }
+  };
+
+  const formatImageUrl = (url: string) => {
+    if (!url || typeof url !== 'string') return url;
+    if (url.includes('drive.google.com')) {
+      const idMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (idMatch && idMatch[1]) {
+        // Use lh3.googleusercontent.com/d/ID which is more reliable for embedding than uc?export=view
+        return `https://lh3.googleusercontent.com/d/${idMatch[1]}`;
+      }
+    }
+    return url;
+  };
+
+  useEffect(() => {
+    const size = new Blob([JSON.stringify(data)]).size;
+    setCurrentSize(size);
+  }, [data]);
 
   const updateField = (path: string, value: any) => {
     setData(prev => {
@@ -657,6 +752,7 @@ function PortfolioApp() {
       ...prev,
       projects: prev.projects.map(p => p.id === id ? { ...p, [field]: value } : p)
     }));
+    setDisplayProjects(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
   };
 
   const handleImageDrop = async (e: React.DragEvent, onImageProcessed: (base64: string) => void) => {
@@ -855,6 +951,70 @@ function PortfolioApp() {
                   />
                 </div>
                 <div className="flex items-center gap-2 border-l border-white/10 pl-4">
+                  <button 
+                    onClick={async () => {
+                      if (confirm("서버의 데이터로 복구하시겠습니까? 현재 수정 중인 내용은 사라집니다.")) {
+                        setIsLoading(true);
+                        const path = 'portfolios/main';
+                        try {
+                          const snap = await getDocFromServer(doc(db, path));
+                          if (snap.exists()) {
+                            const remoteData = snap.data() as PortfolioData;
+                            const merged = {
+                              ...INITIAL_DATA,
+                              ...remoteData,
+                              style: { ...INITIAL_DATA.style, ...(remoteData.style || {}) },
+                              fonts: { ...INITIAL_DATA.fonts, ...(remoteData.fonts || {}) },
+                              textStyles: { ...INITIAL_DATA.textStyles, ...(remoteData.textStyles || {}) }
+                            };
+                            setData(merged);
+                            setDisplayProjects(merged.projects);
+                            alert("서버 데이터가 복구되었습니다.");
+                          } else {
+                            alert("서버에 저장된 데이터가 없습니다.");
+                          }
+                        } catch (e) {
+                          console.error(e);
+                          alert("데이터 복구 중 오류가 발생했습니다.");
+                        }
+                        setIsLoading(false);
+                      }
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 glass rounded-full text-[10px] uppercase tracking-widest font-mono text-white/60 hover:text-orange-500 transition-colors"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    Restore from Server
+                  </button>
+
+                  <div className="flex flex-col items-end gap-1 px-4 border-l border-white/10">
+                    <div className="text-[9px] uppercase tracking-tighter text-white/40 font-mono">Storage Status</div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 h-1 bg-white/10 rounded-full overflow-hidden">
+                        <div 
+                          className={cn(
+                            "h-full transition-all duration-500",
+                            (currentSize / 1048576) > 0.9 ? "bg-red-500" : (currentSize / 1048576) > 0.7 ? "bg-orange-500" : "bg-emerald-500"
+                          )}
+                          style={{ width: `${Math.min(100, (currentSize / 1048576) * 100)}%` }}
+                        />
+                      </div>
+                      <span className={cn(
+                        "text-[10px] font-mono",
+                        (currentSize / 1048576) > 0.9 ? "text-red-500" : "text-white/60"
+                      )}>
+                        {(currentSize / 1024).toFixed(1)}KB / 1024KB
+                      </span>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={fixAllDriveLinks}
+                    className="flex items-center gap-2 px-4 py-2 bg-orange-500/20 text-orange-500 border border-orange-500/30 rounded-full text-[10px] uppercase tracking-widest font-mono hover:bg-orange-500 hover:text-white transition-all"
+                  >
+                    <LinkIcon className="w-3 h-3" />
+                    Force Fix All Google Drive Links
+                  </button>
+
                   <button 
                     onClick={exportData}
                     className="p-1.5 glass rounded-lg hover:bg-white/10 transition-all"
@@ -1093,6 +1253,7 @@ function PortfolioApp() {
                           ...prev,
                           projects: prev.projects.map(p => p.genre === genre ? { ...p, genre: v } : p)
                         }));
+                        setDisplayProjects(prev => prev.map(p => p.genre === genre ? { ...p, genre: v } : p));
                       }} 
                       isEditMode={isEditMode}
                       path={`genre.${genre}`}
@@ -1293,7 +1454,7 @@ function PortfolioApp() {
                     <input 
                       type="text" 
                       value={data.designerPhoto} 
-                      onChange={(e) => updateField('designerPhoto', e.target.value)}
+                      onChange={(e) => updateField('designerPhoto', formatImageUrl(e.target.value))}
                       className="bg-transparent border-none text-xs w-full focus:outline-none"
                       placeholder="Photo URL or /about.png"
                     />
@@ -1605,6 +1766,59 @@ function PortfolioApp() {
                   </div>
                 </div>
 
+                {/* Bulk URL Input (New) */}
+                {isEditMode && (
+                  <div className="p-8 glass rounded-[32px] border border-orange-500/20 space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 text-orange-500 font-mono text-[11px] uppercase tracking-[0.2em]">
+                        <LinkIcon className="w-4 h-4" />
+                        Bulk Add Image URLs
+                      </div>
+                      <button 
+                        onClick={() => setShowBulkInput(!showBulkInput)}
+                        className="px-4 py-1.5 glass rounded-full text-[10px] uppercase tracking-widest text-white/40 hover:text-white transition-all"
+                      >
+                        {showBulkInput ? "Close Input" : "Open Bulk Input"}
+                      </button>
+                    </div>
+                    
+                    {showBulkInput && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-4"
+                      >
+                        <p className="text-[10px] text-white/30 leading-relaxed">
+                          여러 개의 이미지 주소를 한꺼번에 넣을 수 있습니다. <br/>
+                          주소들을 **엔터(줄바꿈)**나 **쉼표(,)**로 구분해서 아래 칸에 붙여넣어 주세요.
+                        </p>
+                        <textarea 
+                          value={bulkUrls}
+                          onChange={(e) => setBulkUrls(e.target.value)}
+                          placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.png&#10;..."
+                          className="w-full h-40 bg-white/5 border border-white/10 rounded-2xl p-5 text-xs font-mono focus:outline-none focus:border-orange-500/50 custom-scrollbar placeholder:opacity-20"
+                        />
+                        <button 
+                          onClick={() => {
+                            const urls = bulkUrls.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0).map(formatImageUrl);
+                            if (urls.length > 0) {
+                              const newImages = [...(selectedProject.images || []), ...urls];
+                              updateProject(selectedProject.id, 'images', newImages);
+                              setBulkUrls("");
+                              setShowBulkInput(false);
+                              alert(`${urls.length}개의 이미지가 추가되었습니다.`);
+                            }
+                          }}
+                          className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
+                        >
+                          <Check className="w-4 h-4" />
+                          Add {bulkUrls.split(/[\n,]+/).filter(u => u.trim().length > 0).length} Images Now
+                        </button>
+                      </motion.div>
+                    )}
+                  </div>
+                )}
+
                 {/* Images Grid */}
                 <div 
                   className={cn(
@@ -1714,7 +1928,7 @@ function PortfolioApp() {
                               value={img} 
                               onChange={(e) => {
                                 const newImages = [...(selectedProject.images || [])];
-                                newImages[idx] = e.target.value;
+                                newImages[idx] = formatImageUrl(e.target.value);
                                 updateProject(selectedProject.id, 'images', newImages);
                               }}
                               className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-orange-500/50"
