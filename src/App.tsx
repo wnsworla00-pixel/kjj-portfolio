@@ -181,7 +181,12 @@ const EditableText = ({
   style?: React.CSSProperties;
 }) => {
   const isSelected = selectedPath === path;
-  
+  const [localValue, setLocalValue] = useState(value);
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
   if (!isEditMode) {
     return (
       <Tag 
@@ -192,6 +197,19 @@ const EditableText = ({
       </Tag>
     );
   }
+
+  const handleBlur = () => {
+    if (localValue !== value) {
+      onChange(localValue);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !multiline) {
+      e.preventDefault();
+      e.currentTarget.blur();
+    }
+  };
 
   return (
     <div 
@@ -206,12 +224,13 @@ const EditableText = ({
     >
       {multiline ? (
         <textarea
-          value={value}
+          value={localValue}
           onChange={(e) => {
-            onChange(e.target.value);
+            setLocalValue(e.target.value);
             e.target.style.height = 'auto';
             e.target.style.height = e.target.scrollHeight + 'px';
           }}
+          onBlur={handleBlur}
           className={cn(
             "w-full bg-white/10 border border-white/20 rounded p-2 focus:outline-none focus:border-orange-500 whitespace-pre-wrap resize-none overflow-hidden", 
             className
@@ -228,8 +247,10 @@ const EditableText = ({
       ) : (
         <input
           type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          value={localValue}
+          onChange={(e) => setLocalValue(e.target.value)}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
           className={cn(
             "bg-white/10 border border-white/20 rounded px-2 py-1 focus:outline-none focus:border-orange-500", 
             className
@@ -328,6 +349,13 @@ function PortfolioApp() {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [displayProjects, setDisplayProjects] = useState<Project[]>(data.projects);
+
+  useEffect(() => {
+    if (!isEditMode) {
+      setDisplayProjects(data.projects);
+    }
+  }, [isEditMode, data.projects]);
 
   const isAdmin = user?.email === "wnsworla00@gmail.com" && user?.emailVerified;
 
@@ -347,6 +375,9 @@ function PortfolioApp() {
       alert("Admin 권한이 없습니다.");
       return false;
     }
+
+    // Update display projects on save
+    setDisplayProjects(newData.projects);
 
     let dataToSave = { ...newData };
     let jsonString = JSON.stringify(dataToSave);
@@ -514,7 +545,7 @@ function PortfolioApp() {
   };
 
   // Group projects by genre
-  const groupedProjects = data.projects.reduce((acc, project) => {
+  const groupedProjects = displayProjects.reduce((acc, project) => {
     const genre = project.genre || "Other";
     if (!acc[genre]) acc[genre] = [];
     acc[genre].push(project);
@@ -611,8 +642,8 @@ function PortfolioApp() {
     // Fallback to defaults if no custom style
     const defaults: Record<string, any> = {
       h1: { size: 72, color: "#FFFFFF", opacity: 1 },
-      h2: { size: 30, color: "#FFFFFF", opacity: 0.9 },
-      body: { size: 18, color: "#FFFFFF", opacity: 0.6 },
+      h2: { size: 15, color: "#FFFFFF", opacity: 1 },
+      body: { size: 13, color: "#FFFFFF", opacity: 1 },
       accent: { size: 12, color: "#f97316", opacity: 0.8 }
     };
     
@@ -685,14 +716,17 @@ function PortfolioApp() {
       genre: genre || "Genre",
       role: "Role",
       location: "Location",
-      year: "2000",
+      year: "2020",
       images: []
     };
     setData(prev => ({ ...prev, projects: [newProject, ...prev.projects] }));
+    // Also update display projects if adding
+    setDisplayProjects(prev => [newProject, ...prev]);
   };
 
   const removeProject = (id: string) => {
     setData(prev => ({ ...prev, projects: prev.projects.filter(p => p.id !== id) }));
+    setDisplayProjects(prev => prev.filter(p => p.id !== id));
   };
 
   const StyleSettings = () => {
@@ -838,63 +872,67 @@ function PortfolioApp() {
               </div>
             )}
             <div className="flex items-center gap-2">
-              {isEditMode ? (
+              {!isVercel && (
                 <>
-                  <button 
-                    onClick={() => {
-                      if (backupData) setData(backupData);
-                      setIsEditMode(false);
-                      setBackupData(null);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-red-500/20 text-red-500 transition-all text-sm font-medium"
-                  >
-                    <X className="w-4 h-4" />
-                    Cancel
-                  </button>
-                  <button 
-                    onClick={async () => {
-                      const success = await saveToFirebase(data);
-                      if (success) {
-                        setIsEditMode(false);
-                        setBackupData(null);
-                      }
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 text-white transition-all text-sm font-medium"
-                  >
-                    <Check className="w-4 h-4" />
-                    Save
-                  </button>
-                </>
-              ) : (
-                <>
-                  {isAdmin && (
-                    <button 
-                      onClick={() => {
-                        setBackupData(JSON.parse(JSON.stringify(data)));
-                        setIsEditMode(true);
-                      }}
-                      className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-white/10 transition-all text-sm font-medium"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                      Edit
-                    </button>
-                  )}
-                  {user ? (
-                    <button 
-                      onClick={logout}
-                      className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-white/10 transition-all text-sm font-medium"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
+                  {isEditMode ? (
+                    <>
+                      <button 
+                        onClick={() => {
+                          if (backupData) setData(backupData);
+                          setIsEditMode(false);
+                          setBackupData(null);
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-red-500/20 text-red-500 transition-all text-sm font-medium"
+                      >
+                        <X className="w-4 h-4" />
+                        Cancel
+                      </button>
+                      <button 
+                        onClick={async () => {
+                          const success = await saveToFirebase(data);
+                          if (success) {
+                            setIsEditMode(false);
+                            setBackupData(null);
+                          }
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 text-white transition-all text-sm font-medium"
+                      >
+                        <Check className="w-4 h-4" />
+                        Save
+                      </button>
+                    </>
                   ) : (
-                    <button 
-                      onClick={login}
-                      className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-white/10 transition-all text-sm font-medium"
-                    >
-                      <LogIn className="w-4 h-4" />
-                      Login
-                    </button>
+                    <>
+                      {isAdmin && (
+                        <button 
+                          onClick={() => {
+                            setBackupData(JSON.parse(JSON.stringify(data)));
+                            setIsEditMode(true);
+                          }}
+                          className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-white/10 transition-all text-sm font-medium"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                          Edit
+                        </button>
+                      )}
+                      {user ? (
+                        <button 
+                          onClick={logout}
+                          className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-white/10 transition-all text-sm font-medium"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Logout
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={login}
+                          className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-white/10 transition-all text-sm font-medium"
+                        >
+                          <LogIn className="w-4 h-4" />
+                          Login
+                        </button>
+                      )}
+                    </>
                   )}
                 </>
               )}
@@ -1741,8 +1779,9 @@ function PortfolioApp() {
               <img 
                 src={selectedImage} 
                 alt="Enlarged view" 
-                className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                className="max-w-full max-h-full object-contain rounded-xl shadow-2xl cursor-pointer"
                 referrerPolicy="no-referrer"
+                onClick={() => setSelectedImage(null)}
               />
             </motion.div>
           </motion.div>
