@@ -1208,9 +1208,9 @@ function PortfolioApp() {
       </section>
 
       {/* 02. Works Section (Swapped) */}
-      <section className="relative py-32 px-6 max-w-7xl mx-auto z-10">
-        <div className="flex flex-col items-center mb-16">
-          <div className="inline-block px-4 py-1 glass rounded-full tracking-widest uppercase mb-8 font-sans font-medium" style={getTextStyle('worksLabel', 'accent')}>
+      <section className="relative py-16 px-6 max-w-7xl mx-auto z-10">
+        <div className="flex flex-col items-center mb-12">
+          <div className="inline-block px-4 py-1 glass rounded-full tracking-widest uppercase mb-6 font-sans font-medium" style={getTextStyle('worksLabel', 'accent')}>
             02. Works
           </div>
           <div className="flex items-center gap-4">
@@ -1241,7 +1241,7 @@ function PortfolioApp() {
                 <div 
                   onClick={() => setExpandedGenre(expandedGenre === genre ? null : genre)}
                   className={cn(
-                    "p-6 glass rounded-3xl flex flex-col items-center justify-center gap-4 cursor-pointer text-center transition-all duration-500 glass-hover",
+                    "p-3 glass rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer text-center transition-all duration-500 glass-hover",
                     expandedGenre === genre && "ring-1 ring-orange-500/30 bg-white/5"
                   )}
                 >
@@ -1418,13 +1418,13 @@ function PortfolioApp() {
       </section>
 
       {/* 03. About Section (Swapped) */}
-      <section className="relative py-32 px-6 max-w-7xl mx-auto z-10">
+      <section className="relative py-16 px-6 max-w-7xl mx-auto z-10">
         <div className="space-y-12">
           <div className="inline-block px-4 py-1 glass rounded-full tracking-widest uppercase font-sans font-medium" style={getTextStyle('aboutLabel', 'accent')}>
             03. About Designer
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-[0.7fr_1.3fr] gap-12 md:gap-20 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-[0.4fr_1.6fr] gap-12 md:gap-20 items-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
