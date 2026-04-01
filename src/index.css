@@ -8,30 +8,88 @@
 @layer base {
   :root {
     --label-scale: 1;
+    --font-boost: 3.8px;
   }
   @media (max-width: 767px) {
     :root {
       --label-scale: 0.6;
+      --font-boost: 0px;
     }
   }
   body {
-    @apply bg-[#0a0502] text-white/90 font-sans selection:bg-orange-500/30;
+    @apply bg-[#050505] text-white/90 font-sans selection:bg-orange-500/30;
   }
 }
 
 @layer components {
   .atmosphere {
-    background: 
-      radial-gradient(circle at 50% 30%, #3a1510 0%, transparent 60%),
-      radial-gradient(circle at 10% 80%, #ff4e00 0%, transparent 50%),
-      radial-gradient(circle at 90% 10%, #4c1d95 0%, transparent 40%);
-    filter: blur(80px);
-    opacity: 0.6;
+    @apply fixed inset-0 w-full h-full;
+    background: #050505;
     pointer-events: none;
   }
 
+  /* New Background Texture Layer */
+  .bg-texture {
+    @apply fixed inset-0 w-full h-full pointer-events-none opacity-50;
+    background-image: 
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"),
+      radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+    background-size: 100% 100%, 100% 100%;
+    background-repeat: no-repeat;
+    mix-blend-mode: soft-light;
+  }
+
+  .moon {
+    @apply fixed left-1/2 top-[35%] -translate-x-1/2 -translate-y-1/2 pointer-events-none;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle at center, 
+      rgba(253, 252, 240, 1) 0%, 
+      rgba(253, 252, 240, 0.7) 20%, 
+      rgba(253, 252, 240, 0.15) 45%, 
+      transparent 85%
+    );
+    filter: blur(60px);
+    opacity: 0.35;
+  }
+
+  .moon-clouds {
+    @apply fixed left-1/2 top-[35%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[2];
+    width: 800px;
+    height: 800px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 800 800' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='moonCloudNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='6' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.2 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23moonCloudNoise)'/%3E%3C/svg%3E");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    opacity: 0.75;
+    mix-blend-mode: multiply;
+    mask-image: radial-gradient(circle at center, black 0%, transparent 100%);
+  }
+
+  .clouds {
+    @apply fixed inset-0 w-full h-full pointer-events-none opacity-50;
+    background-image: 
+      radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.05) 0%, transparent 100%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='cloudNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006' numOctaves='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.4 -0.4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23cloudNoise)'/%3E%3C/svg%3E");
+    background-size: 100% 100%, 100% 100%;
+    background-repeat: no-repeat;
+    mix-blend-mode: soft-light;
+  }
+
+  .cloud-overlay {
+    @apply fixed inset-0 w-full h-full pointer-events-none;
+    background: radial-gradient(circle at 50% 35%, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
+  }
+
+  .vignette {
+    @apply fixed inset-0 w-full h-full pointer-events-none z-[5];
+    background: radial-gradient(circle at 50% 50%, transparent 10%, rgba(0, 0, 0, 0.8) 100%);
+  }
+
   .glass {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+    @apply bg-black/20 backdrop-blur-3xl border border-white/10;
+    box-shadow: 
+      0 15px 50px -12px rgba(0, 0, 0, 0.95),
+      0 0 30px 0 rgba(0, 0, 0, 0.6);
   }
 
   .glass-hover {
