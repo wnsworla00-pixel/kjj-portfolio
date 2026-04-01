@@ -14,6 +14,7 @@ import {
   Trash2,
   ChevronRight,
   ChevronDown,
+  ChevronUp,
   Lightbulb,
   ArrowLeft,
   Image as ImageIcon,
@@ -28,8 +29,12 @@ import {
   LogOut,
   AlertCircle,
   RefreshCw,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Camera,
+  Pencil,
+  Eraser
 } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { GoogleGenAI } from "@google/genai";
 import { cn } from './lib/utils';
 import { PortfolioData, Project } from './types';
@@ -348,6 +353,10 @@ function PortfolioApp() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showDesignerPhotoModal, setShowDesignerPhotoModal] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -360,7 +369,7 @@ function PortfolioApp() {
     }
   }, [isEditMode, data.projects]);
 
-  const isAdmin = user?.email === "wnsworla00@gmail.com" && user?.emailVerified;
+  const isAdmin = user?.email === "wnsworla00@gmail.com";
 
   const login = async () => {
     const provider = new GoogleAuthProvider();
@@ -375,52 +384,55 @@ function PortfolioApp() {
 
   const saveToFirebase = async (newData: PortfolioData): Promise<boolean> => {
     if (!isAdmin) {
-      alert("Admin 권한이 없습니다.");
+      alert("Admin 권한이 없습니다. 로그인이 필요합니다.");
       return false;
     }
 
-    // Update display projects on save
-    setDisplayProjects(newData.projects);
-
-    let dataToSave = { ...newData };
-    let jsonString = JSON.stringify(dataToSave);
-    let sizeInBytes = new Blob([jsonString]).size;
-
-    if (sizeInBytes > 900000) { // ~900KB to be safe
-      setIsLoading(true);
-      try {
-        if (dataToSave.logoUrl) dataToSave.logoUrl = await compressBase64Image(dataToSave.logoUrl, 600, 0.5);
-        if (dataToSave.mainTitleImageUrl) dataToSave.mainTitleImageUrl = await compressBase64Image(dataToSave.mainTitleImageUrl, 800, 0.5);
-        if (dataToSave.studioNameHanjaUrl) dataToSave.studioNameHanjaUrl = await compressBase64Image(dataToSave.studioNameHanjaUrl, 600, 0.5);
-        if (dataToSave.designerPhoto) dataToSave.designerPhoto = await compressBase64Image(dataToSave.designerPhoto, 600, 0.5);
-        
-        dataToSave.projects = await Promise.all(dataToSave.projects.map(async (project) => {
-          if (!project.images) return project;
-          const compressedImages = await Promise.all(project.images.map(img => compressBase64Image(img, 600, 0.5)));
-          return { ...project, images: compressedImages };
-        }));
-
-        jsonString = JSON.stringify(dataToSave);
-        sizeInBytes = new Blob([jsonString]).size;
-      } catch (e) {
-        console.error("Compression failed", e);
-      }
-      setIsLoading(false);
-    }
-
-    if (sizeInBytes > 900000) {
-      alert(`데이터 용량이 너무 큽니다! (현재: ${(sizeInBytes / 1024 / 1024).toFixed(2)}MB / 최대: 1MB)\n\nFirebase Firestore의 문서 용량 제한(1MB)을 초과했습니다. 이미지를 삭제하거나 외부 이미지 링크(URL)를 사용해주세요.`);
-      return false;
-    }
-
-    const path = 'portfolios/main';
+    setIsSaving(true);
     try {
+      // Update display projects on save
+      setDisplayProjects(newData.projects);
+
+      let dataToSave = { ...newData };
+      let jsonString = JSON.stringify(dataToSave);
+      let sizeInBytes = new Blob([jsonString]).size;
+
+      if (sizeInBytes > 900000) { // ~900KB to be safe
+        setIsLoading(true);
+        try {
+          if (dataToSave.logoUrl) dataToSave.logoUrl = await compressBase64Image(dataToSave.logoUrl, 600, 0.5);
+          if (dataToSave.mainTitleImageUrl) dataToSave.mainTitleImageUrl = await compressBase64Image(dataToSave.mainTitleImageUrl, 800, 0.5);
+          if (dataToSave.studioNameHanjaUrl) dataToSave.studioNameHanjaUrl = await compressBase64Image(dataToSave.studioNameHanjaUrl, 600, 0.5);
+          if (dataToSave.designerPhoto) dataToSave.designerPhoto = await compressBase64Image(dataToSave.designerPhoto, 600, 0.5);
+          
+          dataToSave.projects = await Promise.all(dataToSave.projects.map(async (project) => {
+            if (!project.images) return project;
+            const compressedImages = await Promise.all(project.images.map(img => compressBase64Image(img, 600, 0.5)));
+            return { ...project, images: compressedImages };
+          }));
+
+          jsonString = JSON.stringify(dataToSave);
+          sizeInBytes = new Blob([jsonString]).size;
+        } catch (e) {
+          console.error("Compression failed", e);
+        }
+        setIsLoading(false);
+      }
+
+      if (sizeInBytes > 900000) {
+        alert(`데이터 용량이 너무 큽니다! (현재: ${(sizeInBytes / 1024 / 1024).toFixed(2)}MB / 최대: 1MB)\n\nFirebase Firestore의 문서 용량 제한(1MB)을 초과했습니다. 이미지를 삭제하거나 외부 이미지 링크(URL)를 사용해주세요.`);
+        return false;
+      }
+
+      const path = 'portfolios/main';
       await setDoc(doc(db, path), dataToSave);
       alert("성공적으로 저장되었습니다.");
       return true;
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, path);
+      handleFirestoreError(error, OperationType.WRITE, 'portfolios/main');
       return false;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -741,7 +753,7 @@ function PortfolioApp() {
       opacity = custom.opacity;
     } else {
       const defaults: Record<string, any> = {
-        h1: { size: 72, color: "#FFFFFF", opacity: 1 },
+        h1: { size: 48, color: "#FFFFFF", opacity: 1 },
         h2: { size: 15, color: "#FFFFFF", opacity: 1 },
         h3: { size: 13, color: "#FFFFFF", opacity: 1 },
         body: { size: 13, color: "#FFFFFF", opacity: 1 },
@@ -754,7 +766,7 @@ function PortfolioApp() {
     }
     
     const isLabel = path.toLowerCase().includes('label');
-    const fontSize = isLabel ? `calc(${size}pt * var(--label-scale, 1))` : `${size}pt`;
+    const fontSize = isLabel ? `calc(${size}px * var(--label-scale, 1))` : `${size}px`;
     return { fontSize, color, opacity };
   };
 
@@ -764,6 +776,225 @@ function PortfolioApp() {
       projects: prev.projects.map(p => p.id === id ? { ...p, [field]: value } : p)
     }));
     setDisplayProjects(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
+  };
+
+  const handleCapture = async () => {
+    setIsCapturing(true);
+    // Wait for UI to settle
+    setTimeout(async () => {
+      try {
+        const element = document.body;
+        const canvas = await html2canvas(element, {
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#0a0502',
+          scale: 1, // Optimize for performance, especially on Retina displays
+          logging: false,
+          onclone: (clonedDoc) => {
+            try {
+              // html2canvas fails on modern color functions like oklab/oklch
+              const styleTags = clonedDoc.getElementsByTagName('style');
+              for (let i = 0; i < styleTags.length; i++) {
+                const tag = styleTags[i];
+                if (tag.textContent) {
+                  // Replace modern color functions with a safe fallback (orange-500 hex)
+                  tag.textContent = tag.textContent
+                    .replace(/oklab\([^)]+\)/g, '#f97316')
+                    .replace(/oklch\([^)]+\)/g, '#f97316')
+                    .replace(/lab\([^)]+\)/g, '#f97316')
+                    .replace(/lch\([^)]+\)/g, '#f97316')
+                    .replace(/hwb\([^)]+\)/g, '#f97316')
+                    .replace(/color-mix\([^)]+\)/g, '#f97316')
+                    .replace(/light-dark\([^)]+\)/g, '#f97316')
+                    .replace(/color\([^)]+\)/g, '#f97316')
+                    .replace(/rgb\(from[^)]+\)/g, '#f97316')
+                    .replace(/rgba\(from[^)]+\)/g, '#f97316')
+                    .replace(/hsl\(from[^)]+\)/g, '#f97316')
+                    .replace(/hsla\(from[^)]+\)/g, '#f97316');
+                  
+                  // Also remove backdrop-filter as it often causes html2canvas to hang or fail
+                  tag.textContent = tag.textContent.replace(/backdrop-filter:[^;]+;/g, 'background-color: rgba(255,255,255,0.05);');
+                  
+                  // Disable animations and transitions
+                  tag.textContent += `
+                    * { 
+                      animation: none !important; 
+                      transition: none !important; 
+                      animation-duration: 0s !important; 
+                      transition-duration: 0s !important; 
+                    }
+                  `;
+                }
+              }
+
+              const elements = clonedDoc.getElementsByTagName('*');
+              for (let i = 0; i < elements.length; i++) {
+                const el = elements[i] as HTMLElement;
+                
+                // Handle inline styles
+                if (el.style) {
+                  ['color', 'backgroundColor', 'borderColor', 'fill', 'stroke'].forEach(prop => {
+                    try {
+                      const val = el.style.getPropertyValue(prop);
+                      if (val && (val.includes('oklab') || val.includes('oklch') || val.includes('color-mix') || val.includes('lab(') || val.includes('lch(') || val.includes('hwb(') || val.includes('light-dark(') || val.includes('color(') || val.includes('from '))) {
+                        el.style.setProperty(prop, '#f97316', 'important');
+                      }
+                    } catch (e) {}
+                  });
+                  
+                  // Remove backdrop-filter from inline styles
+                  if (el.style.backdropFilter) {
+                    el.style.backdropFilter = 'none';
+                    el.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                  }
+                }
+
+                // Ensure images are handled for CORS
+                if (el instanceof HTMLImageElement) {
+                  el.crossOrigin = "anonymous";
+                }
+              }
+            } catch (cloneErr) {
+              console.error("Error during clone processing", cloneErr);
+            }
+          },
+          ignoreElements: (el) => {
+            return el.classList.contains('capture-ignore') || 
+                   el.classList.contains('atmosphere') || 
+                   el.tagName === 'VIDEO';
+          }
+        });
+        try {
+          setCapturedImage(canvas.toDataURL('image/jpeg', 0.8)); // Use JPEG for smaller size and faster processing
+        } catch (dataUrlErr) {
+          console.error("Canvas toDataURL failed, trying without quality setting", dataUrlErr);
+          setCapturedImage(canvas.toDataURL());
+        }
+      } catch (err) {
+        console.error("Capture failed", err);
+        alert("캡처 중 오류가 발생했습니다. 크롬 브라우저를 사용 중이신지 확인해 주시고, 페이지를 새로고침한 뒤 다시 시도해 주세요.");
+      } finally {
+        setIsCapturing(false);
+      }
+    }, 500);
+  };
+
+  const CaptureOverlay = () => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [color, setColor] = useState('#f97316');
+    const [isDrawingLocal, setIsDrawingLocal] = useState(false);
+
+    useEffect(() => {
+      if (capturedImage && canvasRef.current) {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx?.drawImage(img, 0, 0);
+        };
+        img.src = capturedImage;
+      }
+    }, [capturedImage]);
+
+    const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+      setIsDrawingLocal(true);
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = ('touches' in e) ? e.touches[0].clientX - rect.left : e.nativeEvent.offsetX;
+      const y = ('touches' in e) ? e.touches[0].clientY - rect.top : e.nativeEvent.offsetY;
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+    };
+
+    const draw = (e: React.MouseEvent | React.TouchEvent) => {
+      if (!isDrawingLocal) return;
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = ('touches' in e) ? e.touches[0].clientX - rect.left : e.nativeEvent.offsetX;
+      const y = ('touches' in e) ? e.touches[0].clientY - rect.top : e.nativeEvent.offsetY;
+
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    };
+
+    const stopDrawing = () => {
+      setIsDrawingLocal(false);
+    };
+
+    const downloadCapture = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const link = document.createElement('a');
+      link.download = `feedback-capture-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    };
+
+    return (
+      <div className="fixed inset-0 z-[300] bg-black/90 flex flex-col items-center justify-center p-4 capture-ignore">
+        <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
+          <div className="flex items-center gap-4 glass p-2 rounded-full">
+            <button 
+              onClick={() => setColor('#f97316')} 
+              className={cn("w-6 h-6 rounded-full bg-orange-500 border-2", color === '#f97316' ? "border-white" : "border-transparent")}
+            />
+            <button 
+              onClick={() => setColor('#ef4444')} 
+              className={cn("w-6 h-6 rounded-full bg-red-500 border-2", color === '#ef4444' ? "border-white" : "border-transparent")}
+            />
+            <button 
+              onClick={() => setColor('#22c55e')} 
+              className={cn("w-6 h-6 rounded-full bg-green-500 border-2", color === '#22c55e' ? "border-white" : "border-transparent")}
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={downloadCapture}
+              className="flex items-center gap-2 px-6 py-2 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+            >
+              <Download className="w-4 h-4" />
+              Download & Send to AI
+            </button>
+            <button 
+              onClick={() => setCapturedImage(null)}
+              className="p-2 glass rounded-full hover:bg-white/10 transition-all"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+        <div className="relative max-w-full max-h-[80vh] overflow-auto custom-scrollbar rounded-xl border border-white/10 shadow-2xl">
+          <canvas 
+            ref={canvasRef}
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
+            onTouchStart={startDrawing}
+            onTouchMove={draw}
+            onTouchEnd={stopDrawing}
+            className="cursor-crosshair"
+          />
+        </div>
+        <div className="mt-6 text-white/40 text-xs font-light tracking-widest uppercase">
+          Draw on the image to highlight issues, then download and upload to chat
+        </div>
+      </div>
+    );
   };
 
   const handleImageDrop = async (e: React.DragEvent, onImageProcessed: (base64: string) => void) => {
@@ -832,6 +1063,41 @@ function PortfolioApp() {
     setDisplayProjects(prev => [newProject, ...prev]);
   };
 
+  const moveProject = (id: string, direction: 'up' | 'down') => {
+    const updateList = (list: Project[]) => {
+      const newList = [...list];
+      const index = newList.findIndex(p => p.id === id);
+      if (index === -1) return list;
+      
+      const project = newList[index];
+      let targetIndex = -1;
+      if (direction === 'up') {
+        for (let i = index - 1; i >= 0; i--) {
+          if (newList[i].genre === project.genre && newList[i].year === project.year) {
+            targetIndex = i;
+            break;
+          }
+        }
+      } else {
+        for (let i = index + 1; i < newList.length; i++) {
+          if (newList[i].genre === project.genre && newList[i].year === project.year) {
+            targetIndex = i;
+            break;
+          }
+        }
+      }
+
+      if (targetIndex !== -1) {
+        [newList[index], newList[targetIndex]] = [newList[targetIndex], newList[index]];
+        return newList;
+      }
+      return list;
+    };
+
+    setData(prev => ({ ...prev, projects: updateList(prev.projects) }));
+    setDisplayProjects(prev => updateList(prev));
+  };
+
   const removeProject = (id: string) => {
     setData(prev => ({ ...prev, projects: prev.projects.filter(p => p.id !== id) }));
     setDisplayProjects(prev => prev.filter(p => p.id !== id));
@@ -868,7 +1134,7 @@ function PortfolioApp() {
           <div className="text-orange-500 font-bold truncate max-w-[80px]">{selectedPath}</div>
           <div className="flex items-center gap-3 border-l border-white/10 pl-3">
             <div className="flex flex-col gap-1">
-              <span className="opacity-40">Size (pt)</span>
+              <span className="opacity-40">Size (px)</span>
               <input 
                 type="number"
                 value={currentStyle.size} 
@@ -928,21 +1194,21 @@ function PortfolioApp() {
     <div className="relative min-h-screen overflow-hidden selection:bg-orange-500/30" style={{ fontFamily: 'var(--font-sans)' }}>
       {/* Atmospheric Background */}
       <div className="fixed inset-0 z-0">
-        <div className="atmosphere absolute inset-0" />
+        <div className="atmosphere absolute inset-0 capture-ignore" />
       </div>
 
       {/* Navbar & Admin Panel */}
       <div className="fixed top-0 left-0 right-0 z-[110] flex flex-col">
-        <nav className="glass border-b-0 px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
+        <nav className="glass border-b-0 px-2 md:px-6 py-2 md:py-4 flex justify-between items-center">
+          <div className="flex items-center gap-1 md:gap-2">
             {!isVercel && (
               <>
-                <Lightbulb className="w-6 h-6 text-orange-500" />
-                <span className="font-serif text-xl tracking-widest uppercase" style={{ fontFamily: 'var(--font-serif)' }}>{data.studioName}</span>
+                <Lightbulb className="w-4 h-4 md:w-6 md:h-6 text-orange-500" />
+                <span className="font-serif text-[10px] md:text-xl tracking-widest uppercase truncate max-w-[80px] md:max-w-none" style={{ fontFamily: 'var(--font-serif)' }}>{data.studioName}</span>
               </>
             )}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 md:gap-4">
             {isEditMode && (
               <div className="hidden lg:flex items-center gap-4 glass px-4 py-1 rounded-full">
                 <div className="flex items-center gap-2 text-xs opacity-60">
@@ -1043,9 +1309,17 @@ function PortfolioApp() {
                 </div>
               </div>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2 capture-ignore">
               {!isVercel && (
                 <>
+                  <button 
+                    onClick={handleCapture}
+                    className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 rounded-full glass hover:bg-white/10 transition-all text-[10px] md:text-sm font-medium cursor-pointer"
+                    title="Capture Screen for Feedback"
+                  >
+                    <Camera className="w-3 h-3 md:w-4 md:h-4 text-orange-500" />
+                    <span className="hidden md:inline">Capture</span>
+                  </button>
                   {isEditMode ? (
                     <>
                       <button 
@@ -1054,53 +1328,77 @@ function PortfolioApp() {
                           setIsEditMode(false);
                           setBackupData(null);
                         }}
-                        className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-red-500/20 text-red-500 transition-all text-sm font-medium"
+                        className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 rounded-full glass hover:bg-red-500/20 text-red-500 transition-all text-[10px] md:text-sm font-medium cursor-pointer"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="w-3 h-3 md:w-4 md:h-4" />
                         Cancel
                       </button>
                       <button 
-                        onClick={async () => {
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (isSaving) return;
+                          
+                          if (!isAdmin) {
+                            alert("서버에 저장하려면 관리자 로그인이 필요합니다. 현재 수정사항은 이 브라우저에만 임시 저장되었습니다.");
+                            setIsEditMode(false);
+                            setBackupData(null);
+                            return;
+                          }
+
                           const success = await saveToFirebase(data);
                           if (success) {
                             setIsEditMode(false);
                             setBackupData(null);
                           }
                         }}
-                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 text-white transition-all text-sm font-medium"
+                        disabled={isSaving}
+                        className={cn(
+                          "flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-orange-500 text-white transition-all text-[10px] md:text-sm font-medium shadow-lg shadow-orange-500/20 active:scale-95 hover:bg-orange-600 cursor-pointer",
+                          isSaving && "opacity-70 cursor-not-allowed"
+                        )}
                       >
-                        <Check className="w-4 h-4" />
-                        Save
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-3 h-3 md:w-4 md:h-4" />
+                            Save
+                          </>
+                        )}
                       </button>
                     </>
                   ) : (
                     <>
-                      {isAdmin && (
+                      {(isAdmin || !user) && (
                         <button 
                           onClick={() => {
                             setBackupData(JSON.parse(JSON.stringify(data)));
                             setIsEditMode(true);
                           }}
-                          className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-white/10 transition-all text-sm font-medium"
+                          className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 rounded-full glass hover:bg-white/10 transition-all text-[10px] md:text-sm font-medium cursor-pointer"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <Edit3 className="w-3 h-3 md:w-4 md:h-4" />
                           Edit
                         </button>
                       )}
                       {user ? (
                         <button 
                           onClick={logout}
-                          className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-white/10 transition-all text-sm font-medium"
+                          className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 rounded-full glass hover:bg-white/10 transition-all text-[10px] md:text-sm font-medium cursor-pointer"
                         >
-                          <LogOut className="w-4 h-4" />
+                          <LogOut className="w-3 h-3 md:w-4 md:h-4" />
                           Logout
                         </button>
                       ) : (
                         <button 
                           onClick={login}
-                          className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-white/10 transition-all text-sm font-medium"
+                          className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 rounded-full glass hover:bg-white/10 transition-all text-[10px] md:text-sm font-medium cursor-pointer"
                         >
-                          <LogIn className="w-4 h-4" />
+                          <LogIn className="w-3 h-3 md:w-4 md:h-4" />
                           Login
                         </button>
                       )}
@@ -1342,6 +1640,27 @@ function PortfolioApp() {
                                                 isEditMode && "cursor-default"
                                               )}
                                             >
+                                              {isEditMode && (
+                                                <div className="absolute left-1 md:left-4 flex items-center gap-1 md:gap-2 z-20">
+                                                  <div className="flex flex-col gap-0.5 md:gap-1">
+                                                    <button 
+                                                      onClick={(e) => { e.stopPropagation(); moveProject(project.id, 'up'); }}
+                                                      className="p-1 glass rounded hover:text-orange-500 transition-colors bg-white/5"
+                                                      title="Move Up"
+                                                    >
+                                                      <ChevronUp className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                                                    </button>
+                                                    <button 
+                                                      onClick={(e) => { e.stopPropagation(); moveProject(project.id, 'down'); }}
+                                                      className="p-1 glass rounded hover:text-orange-500 transition-colors bg-white/5"
+                                                      title="Move Down"
+                                                    >
+                                                      <ChevronDown className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                                                    </button>
+                                                  </div>
+                                                </div>
+                                              )}
+
                                               <div className="flex flex-col items-center text-center gap-1">
                                                 <span className="text-orange-500 font-mono text-[10px] tracking-widest" style={getTextStyle(`projects.${project.id}.year`, 'accent')}>
                                                   <EditableText 
@@ -1374,10 +1693,10 @@ function PortfolioApp() {
                                               )}
                                               
                                               {isEditMode && (
-                                                <div className="absolute right-4 flex items-center gap-2">
+                                                <div className="absolute right-1 md:right-4 flex items-center gap-1 md:gap-2">
                                                   <button 
                                                     onClick={() => setSelectedProjectId(project.id)}
-                                                    className="p-1.5 glass rounded-lg hover:bg-orange-500 transition-colors"
+                                                    className="p-1 md:p-1.5 glass rounded-lg hover:bg-orange-500 transition-colors"
                                                     title="Edit Details"
                                                   >
                                                     <Maximize className="w-3 h-3" />
@@ -1387,7 +1706,7 @@ function PortfolioApp() {
                                                       e.stopPropagation();
                                                       removeProject(project.id);
                                                     }}
-                                                    className="p-1.5 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
+                                                    className="p-1 md:p-1.5 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
                                                   >
                                                     <Trash2 className="w-3 h-3" />
                                                   </button>
@@ -1606,7 +1925,7 @@ function PortfolioApp() {
       {/* 04. Contact Section */}
       <section className="relative py-12 md:py-32 px-6 max-w-7xl mx-auto z-10">
         <div className="glass rounded-[32px] md:rounded-[40px] p-6 md:p-20 flex flex-col items-center text-center space-y-6 md:space-y-12 overflow-hidden relative">
-          <div className="atmosphere absolute inset-0 opacity-20 scale-150" />
+          <div className="atmosphere absolute inset-0 opacity-20 scale-150 capture-ignore" />
           
           <div className="relative z-10 space-y-2 md:space-y-4">
             <div className="inline-block px-4 py-1 glass rounded-full tracking-widest uppercase mb-2 md:mb-4 font-sans font-medium" style={getTextStyle('contactLabel', 'accent')}>
@@ -1717,6 +2036,28 @@ function PortfolioApp() {
         )}
       </AnimatePresence>
 
+      {/* Capture Overlay */}
+      <AnimatePresence>
+        {capturedImage && <CaptureOverlay />}
+      </AnimatePresence>
+
+      {/* Loading Overlay for Capture */}
+      <AnimatePresence>
+        {isCapturing && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[400] bg-black/50 backdrop-blur-sm flex items-center justify-center capture-ignore"
+          >
+            <div className="flex flex-col items-center gap-4">
+              <RefreshCw className="w-12 h-12 text-orange-500 animate-spin" />
+              <div className="text-white font-mono text-xs tracking-widest uppercase">Capturing View...</div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Project Details Modal */}
       <AnimatePresence>
         {selectedProjectId && selectedProject && (
@@ -1740,7 +2081,10 @@ function PortfolioApp() {
                 <X className="w-5 h-5 group-hover:scale-110 transition-transform" />
               </button>
 
-              <div className="overflow-y-auto p-8 md:p-16 space-y-12 custom-scrollbar">
+              <div className={cn(
+                "overflow-y-auto p-8 md:p-16 space-y-12 custom-scrollbar",
+                isEditMode && "pt-24 md:pt-32" // Push down to avoid overlap with StyleSettings bar
+              )}>
                 {/* Modal Header */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 text-orange-500 font-mono text-xs tracking-[0.3em] uppercase opacity-60">
@@ -1768,7 +2112,7 @@ function PortfolioApp() {
                       />
                     </div>
                   </div>
-                  <h2 className="font-sans font-medium tracking-tight" style={getTextStyle(`projects.${selectedProject.id}.title`, 'h1')}>
+                  <h2 className="font-sans font-medium tracking-tight" style={getTextStyle(`projects.${selectedProject.id}.title`, 'h3')}>
                     <EditableText 
                       value={selectedProject.title} 
                       onChange={(v) => updateProject(selectedProject.id, 'title', v)} 
@@ -1776,7 +2120,7 @@ function PortfolioApp() {
                       path={`projects.${selectedProject.id}.title`}
                       selectedPath={selectedPath}
                       onSelect={setSelectedPath}
-                      style={getTextStyle(`projects.${selectedProject.id}.title`, 'h1')}
+                      style={getTextStyle(`projects.${selectedProject.id}.title`, 'h3')}
                     />
                   </h2>
                 </div>
@@ -2046,21 +2390,6 @@ function PortfolioApp() {
                 onClick={() => setSelectedImage(null)}
               />
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Edit Mode Helper Toast */}
-      <AnimatePresence>
-        {isEditMode && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] glass px-6 py-3 rounded-full flex items-center gap-3 text-sm font-medium border-orange-500/50 shadow-2xl shadow-orange-500/20"
-          >
-            <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-            Edit Mode Active: Click on any text or image URL to modify.
           </motion.div>
         )}
       </AnimatePresence>
