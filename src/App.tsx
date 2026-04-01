@@ -1192,7 +1192,7 @@ function PortfolioApp() {
           <div className="inline-block px-4 py-1 glass rounded-full tracking-widest uppercase font-sans font-medium" style={getTextStyle('introLabel', 'accent')}>
             01. Intro
           </div>
-          <div className="font-sans italic leading-tight text-white/90 font-medium" style={getTextStyle('intro.quote', 'h2')}>
+          <div className="font-sans italic leading-snug text-white/90 font-medium" style={getTextStyle('intro.quote', 'h2')}>
             "<EditableText 
               value={data.intro.quote} 
               onChange={(v) => updateField('intro.quote', v)} 
@@ -1203,7 +1203,7 @@ function PortfolioApp() {
               style={getTextStyle('intro.quote', 'h2')}
             />"
           </div>
-          <div className="font-light leading-relaxed max-w-2xl mx-auto text-center" style={getTextStyle('intro.description', 'body')}>
+          <div className="font-light leading-[1.8] max-w-2xl mx-auto text-center opacity-80 tracking-tight" style={getTextStyle('intro.description', 'body')}>
             <EditableText 
               value={data.intro.description} 
               onChange={(v) => updateField('intro.description', v)} 
@@ -1584,7 +1584,7 @@ function PortfolioApp() {
             </div>
 
             <div className="col-span-2 md:col-span-1 md:col-start-2 space-y-6 md:-mt-8">
-              <div className="relative font-light leading-relaxed opacity-60 max-w-xl pl-6" style={getTextStyle('about.description', 'body')}>
+              <div className="relative font-light leading-[1.8] opacity-70 max-w-xl pl-6 tracking-tight" style={getTextStyle('about.description', 'body')}>
                 <div className="absolute left-0 top-0 w-[2px] h-[80%] bg-orange-500" />
                 <EditableText 
                   value={data.about.description} 
