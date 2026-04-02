@@ -30,6 +30,7 @@ import {
   AlertCircle,
   RefreshCw,
   Link as LinkIcon,
+  Link2,
   Pencil,
   Eraser
 } from 'lucide-react';
@@ -621,9 +622,14 @@ function PortfolioApp() {
 
         setData(prev => {
           const remoteData = snapshot.data() as PortfolioData;
+          // 로고가 base64 형태거나 예전 파일 경로면 사용자 제공 링크로 강제 교체
+          if (remoteData.logoUrl && (remoteData.logoUrl.startsWith('data:image') || remoteData.logoUrl === '/logo.png')) {
+            remoteData.logoUrl = INITIAL_DATA.logoUrl;
+          }
           const merged = {
             ...INITIAL_DATA,
             ...remoteData,
+            logoUrl: remoteData.logoUrl || INITIAL_DATA.logoUrl,
             style: { ...INITIAL_DATA.style, ...(remoteData.style || {}) },
             fonts: { ...INITIAL_DATA.fonts, ...(remoteData.fonts || {}) },
             textStyles: { ...INITIAL_DATA.textStyles, ...(remoteData.textStyles || {}) }
@@ -1212,18 +1218,14 @@ function PortfolioApp() {
           transition={{ duration: 0.8 }}
           className="flex flex-col items-center text-center gap-2 md:gap-3"
         >
-          {/* Main Hero Image Section (Using logo.png) */}
+          {/* Main Hero Image Section (Google Drive Link Only) */}
           <div 
             className={cn(
               "relative group/logo flex flex-col items-center w-full max-w-2xl",
-              isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
+              isEditMode && "p-8 border-2 border-dashed border-orange-500/30 rounded-3xl bg-orange-500/5 transition-all"
             )}
-            onDragOver={(e) => {
-              if (isEditMode) e.preventDefault();
-            }}
-            onDrop={(e) => handleImageDrop(e, (base64) => updateField('logoUrl', base64))}
           >
-            {data.logoUrl && (
+            {data.logoUrl ? (
               <img 
                 key={data.logoUrl}
                 src={formatImageUrl(data.logoUrl)} 
@@ -1231,39 +1233,43 @@ function PortfolioApp() {
                 className="w-full h-auto max-h-[320px] md:max-h-[480px] object-contain"
                 referrerPolicy="no-referrer"
               />
+            ) : (
+              isEditMode && (
+                <div className="py-12 flex flex-col items-center gap-4 text-orange-500/40">
+                  <ImageIcon className="w-16 h-16" />
+                  <p className="text-sm font-medium">로고 URL을 아래에 입력해주세요</p>
+                </div>
+              )
             )}
             
             {isEditMode && (
-              <div className="mt-4 flex flex-col items-center gap-2">
-                <div className="w-72 glass px-4 py-2 rounded-full flex items-center gap-3" style={{ textShadow: 'none', letterSpacing: 'normal' }}>
-                  <ImageIcon className="w-4 h-4 opacity-50" />
+              <div className="mt-6 w-full max-w-md flex flex-col items-center gap-3">
+                <div className="w-full glass px-4 py-3 rounded-2xl flex items-center gap-3 border border-white/10 focus-within:border-orange-500/50 transition-all shadow-xl">
+                  <Link2 className="w-4 h-4 text-orange-500" />
                   <input 
                     value={data.logoUrl || ''} 
-                    onChange={(e) => updateField('logoUrl', formatImageUrl(e.target.value))}
-                    className="bg-transparent border-none text-[11px] w-full focus:outline-none placeholder-white/50"
-                    placeholder="로고 이미지 URL (logo.png)"
+                    onChange={(e) => updateField('logoUrl', e.target.value)}
+                    className="bg-transparent border-none text-xs md:text-sm w-full focus:outline-none placeholder-white/30 text-white"
+                    placeholder="구글 드라이브 공유 링크를 붙여넣으세요"
                   />
-                  <button 
-                    onClick={() => {
-                      const newUrl = `/logo.png?t=${Date.now()}`;
-                      updateField('logoUrl', newUrl);
-                    }}
-                    className="px-2 py-1 hover:bg-white/10 rounded text-[9px] uppercase font-mono text-orange-500 border border-orange-500/30 whitespace-nowrap"
-                    title="Reset to local logo.png"
-                  >
-                    Reset
-                  </button>
-                  <button 
-                    onClick={() => updateField('logoUrl', '')}
-                    className="px-2 py-1 hover:bg-red-500/10 rounded text-[9px] uppercase font-mono text-red-500 border border-red-500/30 whitespace-nowrap"
-                    title="Remove Logo"
-                  >
-                    Remove
-                  </button>
+                  {data.logoUrl && (
+                    <button 
+                      onClick={() => updateField('logoUrl', '')}
+                      className="p-1.5 hover:bg-red-500/20 rounded-full text-red-500 transition-colors"
+                      title="Clear URL"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
-                <p className="text-[9px] text-orange-500/80 font-medium uppercase tracking-tighter animate-pulse">
-                  * You must click the 'SAVE' button at the top right to persist changes!
-                </p>
+                <div className="flex flex-col items-center gap-1">
+                  <p className="text-[10px] text-orange-500/80 font-bold uppercase tracking-widest">
+                    * Paste Google Drive Link Above
+                  </p>
+                  <p className="text-[9px] text-white/40">
+                    (포트폴리오 사진처럼 링크만 넣으면 자동으로 적용됩니다)
+                  </p>
+                </div>
               </div>
             )}
           </div>

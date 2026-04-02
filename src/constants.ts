@@ -6,7 +6,7 @@ export const INITIAL_DATA: PortfolioData = {
   mainTitleImageUrl: "/title.png",
   studioNameHanjaUrl: "/bhd.png",
   designerPhoto: "/03.png",
-  logoUrl: "/logo.png",
+  logoUrl: "https://drive.google.com/file/d/1ZyPDxFDvk3IyNv0T1nfv1gFpRQ9l6XyK/view?usp=sharing",
   fonts: {
     sans: "'Inter', sans-serif",
     serif: "'Cormorant Garamond', serif"
