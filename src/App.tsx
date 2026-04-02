@@ -317,6 +317,7 @@ const compressBase64Image = (base64: string, maxWidth = 800, quality = 0.6): Pro
 };
 
 function PortfolioApp() {
+  const [sessionTimestamp] = useState(Date.now());
   const [data, setData] = useState<PortfolioData>(() => {
     try {
       const draft = localStorage.getItem('portfolio_draft');
@@ -389,6 +390,12 @@ function PortfolioApp() {
       setDisplayProjects(newData.projects);
 
       let dataToSave = { ...newData };
+      
+      // 로고가 base64 형태면 저장하지 않고 기본 경로로 되돌림
+      if (dataToSave.logoUrl && dataToSave.logoUrl.startsWith('data:image')) {
+        dataToSave.logoUrl = '/logo.png';
+      }
+
       let jsonString = JSON.stringify(dataToSave);
       let sizeInBytes = new Blob([jsonString]).size;
 
@@ -410,20 +417,28 @@ function PortfolioApp() {
           sizeInBytes = new Blob([jsonString]).size;
         } catch (e) {
           console.error("Compression failed", e);
+        } finally {
+          setIsLoading(false);
         }
-        setIsLoading(false);
       }
 
-      if (sizeInBytes > 900000) {
-        alert(`데이터 용량이 너무 큽니다! (현재: ${(sizeInBytes / 1024 / 1024).toFixed(2)}MB / 최대: 1MB)\n\nFirebase Firestore의 문서 용량 제한(1MB)을 초과했습니다. 이미지를 삭제하거나 외부 이미지 링크(URL)를 사용해주세요.`);
+      if (sizeInBytes > 950000) {
+        alert(`데이터 용량이 너무 큽니다! (현재: ${(sizeInBytes / 1024 / 1024).toFixed(2)}MB / 최대: 1MB)\n이미지 크기를 줄이거나 외부 링크를 사용해주세요.`);
         return false;
       }
 
       const path = 'portfolios/main';
+      console.log("Saving to Firebase:", dataToSave);
       await setDoc(doc(db, path), dataToSave);
-      alert("성공적으로 저장되었습니다.");
+      
+      setData(dataToSave);
+      console.log("Successfully saved to Firestore.");
+      alert("성공적으로 서버에 저장되었습니다. 변경사항을 확인하기 위해 페이지를 새로고침합니다.");
+      window.location.reload();
       return true;
     } catch (error) {
+      console.error("Save failed:", error);
+      alert("저장에 실패했습니다. 관리자 권한을 확인하거나 네트워크 상태를 체크해주세요.");
       handleFirestoreError(error, OperationType.WRITE, 'portfolios/main');
       return false;
     } finally {
@@ -611,9 +626,15 @@ function PortfolioApp() {
         }
 
         setData(prev => {
+          const remoteData = snapshot.data() as PortfolioData;
+          // 로고가 base64 형태면 무시하고 기본 logo.png를 사용하도록 강제함
+          if (remoteData.logoUrl && remoteData.logoUrl.startsWith('data:image')) {
+            remoteData.logoUrl = '/logo.png';
+          }
           const merged = {
             ...INITIAL_DATA,
             ...remoteData,
+            logoUrl: remoteData.logoUrl || '/logo.png',
             style: { ...INITIAL_DATA.style, ...(remoteData.style || {}) },
             fonts: { ...INITIAL_DATA.fonts, ...(remoteData.fonts || {}) },
             textStyles: { ...INITIAL_DATA.textStyles, ...(remoteData.textStyles || {}) }
@@ -784,46 +805,17 @@ function PortfolioApp() {
     if (!imageFile) return;
 
     try {
-      const compressedBase64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 1200;
-            const MAX_HEIGHT = 1200;
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-              if (width > MAX_WIDTH) {
-                height *= MAX_WIDTH / width;
-                width = MAX_WIDTH;
-              }
-            } else {
-              if (height > MAX_HEIGHT) {
-                width *= MAX_HEIGHT / height;
-                height = MAX_HEIGHT;
-              }
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx?.drawImage(img, 0, 0, width, height);
-            
-            // Use webp to preserve transparency while compressing
-            resolve(canvas.toDataURL('image/webp', 0.8));
-          };
-          img.onerror = reject;
-          img.src = event.target?.result as string;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(imageFile);
-      });
-      onImageProcessed(compressedBase64);
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64 = event.target?.result as string;
+        // 드롭 즉시 압축하여 용량 문제 방지 (최대 너비 800px, 품질 0.6)
+        const compressed = await compressBase64Image(base64, 800, 0.6);
+        onImageProcessed(compressed);
+      };
+      reader.readAsDataURL(imageFile);
     } catch (err) {
-      console.error("Failed to compress image", err);
+      console.error("Failed to process image", err);
+      alert("이미지 처리 중 오류가 발생했습니다.");
     }
   };
 
@@ -1009,29 +1001,34 @@ function PortfolioApp() {
                 <div className="flex items-center gap-2 border-l border-white/10 pl-4">
                   <button 
                     onClick={async () => {
-                      if (confirm("서버의 데이터로 복구하시겠습니까? 현재 수정 중인 내용은 사라집니다.")) {
+                      if (confirm("Do you want to restore data from the server? Your current unsaved changes will be lost.")) {
                         setIsLoading(true);
                         const path = 'portfolios/main';
                         try {
                           const snap = await getDocFromServer(doc(db, path));
                           if (snap.exists()) {
                             const remoteData = snap.data() as PortfolioData;
+                            // 로고가 base64 형태면 무시하고 기본 logo.png를 사용하도록 강제함
+                            if (remoteData.logoUrl && remoteData.logoUrl.startsWith('data:image')) {
+                              remoteData.logoUrl = '/logo.png';
+                            }
                             const merged = {
                               ...INITIAL_DATA,
                               ...remoteData,
+                              logoUrl: remoteData.logoUrl || '/logo.png',
                               style: { ...INITIAL_DATA.style, ...(remoteData.style || {}) },
                               fonts: { ...INITIAL_DATA.fonts, ...(remoteData.fonts || {}) },
                               textStyles: { ...INITIAL_DATA.textStyles, ...(remoteData.textStyles || {}) }
                             };
                             setData(merged);
                             setDisplayProjects(merged.projects);
-                            alert("서버 데이터가 복구되었습니다.");
+                            alert("Server data has been restored.");
                           } else {
-                            alert("서버에 저장된 데이터가 없습니다.");
+                            alert("No data found on the server.");
                           }
                         } catch (e) {
                           console.error(e);
-                          alert("데이터 복구 중 오류가 발생했습니다.");
+                          alert("An error occurred while restoring data.");
                         }
                         setIsLoading(false);
                       }
@@ -1120,16 +1117,22 @@ function PortfolioApp() {
                           if (isSaving) return;
                           
                           if (!isAdmin) {
-                            alert("서버에 저장하려면 관리자 로그인이 필요합니다. 현재 수정사항은 이 브라우저에만 임시 저장되었습니다.");
+                            console.log("Admin check failed. Current user email:", user?.email);
+                            alert("Admin login is required to save to the server. Your changes have been temporarily saved to this browser only.");
                             setIsEditMode(false);
                             setBackupData(null);
                             return;
                           }
 
-                          const success = await saveToFirebase(data);
-                          if (success) {
-                            setIsEditMode(false);
-                            setBackupData(null);
+                          try {
+                            const success = await saveToFirebase(data);
+                            if (success) {
+                              setIsEditMode(false);
+                              setBackupData(null);
+                            }
+                          } catch (err) {
+                            console.error("Save failed in button handler:", err);
+                            alert("An error occurred while saving. Please check the console.");
                           }
                         }}
                         disabled={isSaving}
@@ -1153,6 +1156,12 @@ function PortfolioApp() {
                     </>
                   ) : (
                     <>
+                      {isAdmin && (
+                        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/20 text-orange-500 text-[9px] font-bold uppercase tracking-widest border border-orange-500/30">
+                          <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                          Admin
+                        </div>
+                      )}
                       {(isAdmin || !user) && (
                         <button 
                           onClick={() => {
@@ -1225,12 +1234,15 @@ function PortfolioApp() {
             }}
             onDrop={(e) => handleImageDrop(e, (base64) => updateField('logoUrl', base64))}
           >
-            <img 
-              src={data.logoUrl ? (data.logoUrl.startsWith('/') ? `${data.logoUrl}?t=${Date.now()}` : data.logoUrl) : undefined} 
-              alt={data.studioName}
-              className="w-full h-auto max-h-[320px] md:max-h-[480px] object-contain"
-              referrerPolicy="no-referrer"
-            />
+            {data.logoUrl && (
+              <img 
+                key={data.logoUrl}
+                src={data.logoUrl.startsWith('data:') ? data.logoUrl : (data.logoUrl.includes('?t=') ? data.logoUrl : `${data.logoUrl}?t=${Date.now()}`)} 
+                alt={data.studioName}
+                className="w-full h-auto max-h-[320px] md:max-h-[480px] object-contain"
+                referrerPolicy="no-referrer"
+              />
+            )}
             
             {isEditMode && (
               <div className="mt-4 flex flex-col items-center gap-2">
@@ -1243,15 +1255,25 @@ function PortfolioApp() {
                     placeholder="로고 이미지 URL (logo.png)"
                   />
                   <button 
-                    onClick={() => updateField('logoUrl', `/logo.png?t=${Date.now()}`)}
+                    onClick={() => {
+                      const newUrl = `/logo.png?t=${Date.now()}`;
+                      updateField('logoUrl', newUrl);
+                    }}
                     className="px-2 py-1 hover:bg-white/10 rounded text-[9px] uppercase font-mono text-orange-500 border border-orange-500/30 whitespace-nowrap"
                     title="Reset to local logo.png"
                   >
                     Reset
                   </button>
+                  <button 
+                    onClick={() => updateField('logoUrl', '')}
+                    className="px-2 py-1 hover:bg-red-500/10 rounded text-[9px] uppercase font-mono text-red-500 border border-red-500/30 whitespace-nowrap"
+                    title="Remove Logo"
+                  >
+                    Remove
+                  </button>
                 </div>
                 <p className="text-[9px] text-orange-500/80 font-medium uppercase tracking-tighter animate-pulse">
-                  * 변경 후 반드시 우측 상단의 'SAVE' 버튼을 눌러야 저장됩니다!
+                  * You must click the 'SAVE' button at the top right to persist changes!
                 </p>
               </div>
             )}
