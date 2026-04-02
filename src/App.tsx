@@ -390,12 +390,6 @@ function PortfolioApp() {
       setDisplayProjects(newData.projects);
 
       let dataToSave = { ...newData };
-      
-      // 로고가 base64 형태면 저장하지 않고 기본 경로로 되돌림
-      if (dataToSave.logoUrl && dataToSave.logoUrl.startsWith('data:image')) {
-        dataToSave.logoUrl = '/logo.png';
-      }
-
       let jsonString = JSON.stringify(dataToSave);
       let sizeInBytes = new Blob([jsonString]).size;
 
@@ -627,14 +621,9 @@ function PortfolioApp() {
 
         setData(prev => {
           const remoteData = snapshot.data() as PortfolioData;
-          // 로고가 base64 형태면 무시하고 기본 logo.png를 사용하도록 강제함
-          if (remoteData.logoUrl && remoteData.logoUrl.startsWith('data:image')) {
-            remoteData.logoUrl = '/logo.png';
-          }
           const merged = {
             ...INITIAL_DATA,
             ...remoteData,
-            logoUrl: remoteData.logoUrl || '/logo.png',
             style: { ...INITIAL_DATA.style, ...(remoteData.style || {}) },
             fonts: { ...INITIAL_DATA.fonts, ...(remoteData.fonts || {}) },
             textStyles: { ...INITIAL_DATA.textStyles, ...(remoteData.textStyles || {}) }
@@ -1237,7 +1226,7 @@ function PortfolioApp() {
             {data.logoUrl && (
               <img 
                 key={data.logoUrl}
-                src={data.logoUrl.startsWith('data:') ? data.logoUrl : (data.logoUrl.includes('?t=') ? data.logoUrl : `${data.logoUrl}?t=${Date.now()}`)} 
+                src={formatImageUrl(data.logoUrl)} 
                 alt={data.studioName}
                 className="w-full h-auto max-h-[320px] md:max-h-[480px] object-contain"
                 referrerPolicy="no-referrer"
