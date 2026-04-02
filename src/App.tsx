@@ -603,11 +603,14 @@ function PortfolioApp() {
     const unsubscribe = onSnapshot(doc(db, path), (snapshot) => {
       if (snapshot.exists()) {
         const remoteData = snapshot.data() as PortfolioData;
+        
+        // If we are in edit mode, we only update if the remote data is newer or if we just saved
+        if (isEditModeRef.current) {
+          setIsLoading(false);
+          return;
+        }
+
         setData(prev => {
-          // If we are in edit mode AND we have actual modified data (not just initial), keep it
-          const isInitial = JSON.stringify(prev.projects) === JSON.stringify(INITIAL_DATA.projects);
-          if (isEditModeRef.current && !isInitial) return prev;
-          
           const merged = {
             ...INITIAL_DATA,
             ...remoteData,
@@ -1069,6 +1072,16 @@ function PortfolioApp() {
                   </button>
 
                   <button 
+                    onClick={() => {
+                      localStorage.removeItem('portfolio_draft');
+                      window.location.reload();
+                    }}
+                    className="p-1.5 glass rounded-lg hover:bg-red-500/20 text-red-500 transition-all"
+                    title="Clear Local Cache & Reload"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button 
                     onClick={exportData}
                     className="p-1.5 glass rounded-lg hover:bg-white/10 transition-all"
                     title="Export Data (JSON)"
@@ -1194,46 +1207,59 @@ function PortfolioApp() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative pt-[120px] md:pt-[150px] lg:pt-[190px] pb-20 px-6 max-w-7xl mx-auto z-10">
+      <section className="relative pt-[80px] md:pt-[100px] lg:pt-[130px] pb-20 px-6 max-w-7xl mx-auto z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="flex flex-col items-center text-center gap-4 md:gap-6"
+          className="flex flex-col items-center text-center gap-2 md:gap-3"
         >
-          {/* Main Hero Image Section */}
+          {/* Main Hero Image Section (Using logo.png) */}
           <div 
             className={cn(
-              "relative group/maintitle flex flex-col items-center w-full max-w-2xl",
+              "relative group/logo flex flex-col items-center w-full max-w-2xl",
               isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
             )}
             onDragOver={(e) => {
               if (isEditMode) e.preventDefault();
             }}
-            onDrop={(e) => handleImageDrop(e, (base64) => updateField('mainTitleImageUrl', base64))}
+            onDrop={(e) => handleImageDrop(e, (base64) => updateField('logoUrl', base64))}
           >
             <img 
-              src={data.mainTitleImageUrl || undefined} 
+              src={data.logoUrl ? (data.logoUrl.startsWith('/') ? `${data.logoUrl}?t=${Date.now()}` : data.logoUrl) : undefined} 
               alt={data.studioName}
               className="w-full h-auto max-h-[320px] md:max-h-[480px] object-contain"
               referrerPolicy="no-referrer"
             />
             
             {isEditMode && (
-              <div className="mt-4 w-72 glass px-4 py-2 rounded-full flex items-center gap-3" style={{ textShadow: 'none', letterSpacing: 'normal' }}>
-                <ImageIcon className="w-4 h-4 opacity-50" />
-                <input 
-                  value={data.mainTitleImageUrl || ''} 
-                  onChange={(e) => updateField('mainTitleImageUrl', e.target.value)}
-                  className="bg-transparent border-none text-[11px] w-full focus:outline-none placeholder-white/50"
-                  placeholder="통합 메인 이미지 URL"
-                />
+              <div className="mt-4 flex flex-col items-center gap-2">
+                <div className="w-72 glass px-4 py-2 rounded-full flex items-center gap-3" style={{ textShadow: 'none', letterSpacing: 'normal' }}>
+                  <ImageIcon className="w-4 h-4 opacity-50" />
+                  <input 
+                    value={data.logoUrl || ''} 
+                    onChange={(e) => updateField('logoUrl', formatImageUrl(e.target.value))}
+                    className="bg-transparent border-none text-[11px] w-full focus:outline-none placeholder-white/50"
+                    placeholder="로고 이미지 URL (logo.png)"
+                  />
+                  <button 
+                    onClick={() => updateField('logoUrl', `/logo.png?t=${Date.now()}`)}
+                    className="px-2 py-1 hover:bg-white/10 rounded text-[9px] uppercase font-mono text-orange-500 border border-orange-500/30 whitespace-nowrap"
+                    title="Reset to local logo.png"
+                  >
+                    Reset
+                  </button>
+                </div>
+                <p className="text-[9px] text-orange-500/80 font-medium uppercase tracking-tighter animate-pulse">
+                  * 변경 후 반드시 우측 상단의 'SAVE' 버튼을 눌러야 저장됩니다!
+                </p>
               </div>
             )}
           </div>
+
           <div className="font-light tracking-[0.15em] uppercase ml-[0.15em]" style={getTextStyle('heroSub', 'body')}>
             <EditableText 
-              value={data.heroSub || "Lighting Design"} 
+              value={data.heroSub || "STAGE LIGHTING DESIGN"} 
               onChange={(v) => updateField('heroSub', v)} 
               isEditMode={isEditMode}
               path="heroSub"
