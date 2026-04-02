@@ -1194,12 +1194,12 @@ function PortfolioApp() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative pt-[180px] md:pt-[220px] lg:pt-[280px] pb-20 px-6 max-w-7xl mx-auto z-10">
+      <section className="relative pt-[120px] md:pt-[150px] lg:pt-[190px] pb-20 px-6 max-w-7xl mx-auto z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="flex flex-col items-center text-center gap-8 md:gap-12"
+          className="flex flex-col items-center text-center gap-4 md:gap-6"
         >
           {/* Main Hero Image Section */}
           <div 
