@@ -270,7 +270,7 @@ const EditableText = ({
   );
 };
 
-const isVercel = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
+const isShared = typeof window !== 'undefined' && window.location.hostname.includes('ais-pre');
 
 export default function App() {
   return (
@@ -983,14 +983,6 @@ function PortfolioApp() {
       <div className="fixed top-0 left-0 right-0 z-[150] flex flex-col">
         <nav className="glass border-b-0 px-2 md:px-6 py-2 md:py-4 flex justify-between items-center">
           <div className="flex items-center gap-1 md:gap-2">
-            {!isVercel && (
-              <>
-                  <div className="relative flex items-center justify-center p-1.5">
-                    <Lightbulb className="w-6 h-6 md:w-8 md:h-8 text-orange-500 relative z-0 drop-shadow-[0_0_8px_rgba(249,115,22,0.4)]" />
-                  </div>
-                <span className="font-serif text-[10px] md:text-xl tracking-widest uppercase truncate max-w-[80px] md:max-w-none" style={{ fontFamily: 'var(--font-serif)' }}>{data.studioName}</span>
-              </>
-            )}
           </div>
           <div className="flex items-center gap-1 md:gap-4">
             {isEditMode && (
@@ -1094,7 +1086,8 @@ function PortfolioApp() {
               </div>
             )}
             <div className="flex items-center gap-1 md:gap-2 capture-ignore">
-              {isEditMode ? (
+              {!isShared && (
+                isEditMode ? (
                     <>
                       <button 
                         onClick={() => {
@@ -1177,7 +1170,8 @@ function PortfolioApp() {
                         </button>
                       )}
                     </>
-                  )}
+                  )
+              )}
             </div>
           </div>
         </nav>
