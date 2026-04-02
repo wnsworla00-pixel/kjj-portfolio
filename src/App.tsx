@@ -270,7 +270,7 @@ const EditableText = ({
   );
 };
 
-const isShared = typeof window !== 'undefined' && window.location.hostname.includes('ais-pre');
+const isDev = typeof window !== 'undefined' && window.location.hostname.includes('ais-dev');
 
 export default function App() {
   return (
@@ -1086,7 +1086,7 @@ function PortfolioApp() {
               </div>
             )}
             <div className="flex items-center gap-1 md:gap-2 capture-ignore">
-              {!isShared && (
+              {isDev && (
                 isEditMode ? (
                     <>
                       <button 
