@@ -14,7 +14,8 @@ export const INITIAL_DATA: PortfolioData = {
   textStyles: {
     'copyright': { size: 8, color: '#f97316', opacity: 0.6 },
     'about.name': { size: 40, color: '#FFFFFF', opacity: 1 },
-    'about.englishName': { size: 24, color: '#FFFFFF', opacity: 0.6 }
+    'about.englishName': { size: 24, color: '#FFFFFF', opacity: 0.6 },
+    'heroSub': { size: 13, color: '#FFFFFF', opacity: 1 }
   },
   intro: {
     quote: "무대 위에서 '불(빛)을 하는' 자, 불한당(不汗黨).",

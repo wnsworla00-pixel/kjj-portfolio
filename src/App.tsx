@@ -632,7 +632,10 @@ function PortfolioApp() {
             logoUrl: remoteData.logoUrl || INITIAL_DATA.logoUrl,
             style: { ...INITIAL_DATA.style, ...(remoteData.style || {}) },
             fonts: { ...INITIAL_DATA.fonts, ...(remoteData.fonts || {}) },
-            textStyles: { ...INITIAL_DATA.textStyles, ...(remoteData.textStyles || {}) }
+            textStyles: { 
+              ...INITIAL_DATA.textStyles, 
+              ...(remoteData.textStyles || {}) 
+            }
           };
           
           // Sync display projects when loading from server
@@ -1013,7 +1016,10 @@ function PortfolioApp() {
                               logoUrl: remoteData.logoUrl || '/logo.png',
                               style: { ...INITIAL_DATA.style, ...(remoteData.style || {}) },
                               fonts: { ...INITIAL_DATA.fonts, ...(remoteData.fonts || {}) },
-                              textStyles: { ...INITIAL_DATA.textStyles, ...(remoteData.textStyles || {}) }
+                              textStyles: { 
+                                ...INITIAL_DATA.textStyles, 
+                                ...(remoteData.textStyles || {}) 
+                              }
                             };
                             setData(merged);
                             setDisplayProjects(merged.projects);
