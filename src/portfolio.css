@@ -9,3 +9,8 @@
 @media(max-width:900px){.year-photo-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 16px}}
 @media(max-width:700px){.year-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 14px}.photo-project h3,.photo-project:only-child h3{font-size:14px;margin:9px 0 5px}.photo-project .project-meta,.photo-project:only-child .project-meta{margin-top:12px;font-size:9px;letter-spacing:0}.photo-project .project-meta span:last-child{display:none}.photo-project p{font-size:11px}.photo-project .project-image{aspect-ratio:1.42}.portrait{max-width:200px}}
 
+
+/* Small designer portrait alongside biography. */
+.about{grid-template-columns:clamp(80px,8vw,120px) minmax(0,1fr);gap:40px;align-items:start}.about .portrait{width:100%;max-width:none;aspect-ratio:.84;margin-top:6px}.portrait>span{display:none}.about-description{max-width:650px}.about h2{font-size:clamp(26px,3vw,40px)}
+@media(max-width:600px){.about{grid-template-columns:72px minmax(0,1fr);gap:20px}.about h2{font-size:24px;letter-spacing:-1px}.about-description{font-size:14px;line-height:1.9;margin:22px 0}.designer h3{font-size:19px}.designer h3 span{display:block;margin:7px 0 0}.designer p{font-size:12px}.signature{line-height:1.8;margin-top:26px}}
+
