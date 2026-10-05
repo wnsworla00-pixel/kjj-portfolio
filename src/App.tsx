@@ -271,7 +271,7 @@ const EditableText = ({
   );
 };
 
-const isDev = typeof window !== 'undefined' && window.location.hostname.includes('ais-dev');
+const isDev = import.meta.env.DEV;
 
 export default function App() {
   return (
