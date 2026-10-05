@@ -1,4 +1,6 @@
 import * as React from 'react';
+import PublicPortfolio from './PortfolioApp';
+import './editor-theme.css';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -960,9 +962,9 @@ function PortfolioApp() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden selection:bg-orange-500/30" style={{ fontFamily: 'var(--font-sans)' }}>
+    <div className="editor-root relative min-h-screen overflow-hidden selection:bg-orange-500/30" style={{ fontFamily: 'var(--font-sans)' }}>
       {/* Atmospheric Background */}
-      <div className="fixed inset-0 z-0 overflow-hidden">
+      <div className="legacy-atmosphere fixed inset-0 z-0 overflow-hidden">
         <div className="atmosphere absolute inset-0 capture-ignore" />
         <div className="bg-texture absolute inset-0 capture-ignore" />
         <div className="moon absolute capture-ignore" />
@@ -973,7 +975,7 @@ function PortfolioApp() {
       </div>
 
       {/* Navbar & Admin Panel */}
-      <div className="fixed top-0 left-0 right-0 z-[150] flex flex-col">
+      <div className="editor-toolbar fixed top-0 left-0 right-0 z-[150] flex flex-col">
         <nav className="glass border-b-0 px-2 md:px-6 py-2 md:py-4 flex justify-between items-center">
           <div className="flex items-center gap-1 md:gap-2">
           </div>
@@ -1216,6 +1218,10 @@ function PortfolioApp() {
         </AnimatePresence>
       </div>
 
+      <div className="editor-preview">
+        <PublicPortfolio editor={{data,active:isEditMode,select:setSelectedProjectId,text:(path,value)=><EditableText value={value} onChange={v=>updateField(path,v)} isEditMode={isEditMode} path={path} selectedPath={selectedPath} onSelect={setSelectedPath}/>}}/>
+      </div>
+      <details className="legacy-fields"><summary>스튜디오 정보 · 이미지 · 스타일 수정 (기존 편집 도구)</summary>
       {/* Hero Section */}
       <section className="relative pt-[80px] md:pt-[100px] lg:pt-[130px] pb-20 px-6 max-w-7xl mx-auto z-10">
         <motion.div
@@ -1818,6 +1824,7 @@ function PortfolioApp() {
         </div>
       </footer>
 
+      </details>
       {/* Designer Photo Modal */}
       <AnimatePresence>
         {showDesignerPhotoModal && (
@@ -1860,7 +1867,7 @@ function PortfolioApp() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
           >
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-md" onClick={() => setSelectedProjectId(null)} />
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-md" aria-label="작품 편집 닫기" onClick={() => setSelectedProjectId(null)} />
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -1868,7 +1875,7 @@ function PortfolioApp() {
               className="relative w-full max-w-5xl max-h-[90vh] glass rounded-[40px] overflow-hidden shadow-2xl flex flex-col"
             >
               <button 
-                onClick={() => setSelectedProjectId(null)}
+                aria-label="작품 편집 닫기" onClick={() => setSelectedProjectId(null)}
                 className="absolute top-6 right-6 z-20 p-3 glass rounded-full hover:bg-orange-500 transition-colors group"
               >
                 <X className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -2102,6 +2109,14 @@ function PortfolioApp() {
                             </div>
                           )}
                         </div>
+                        {isEditMode && (
+                          <div className="photo-order-controls">
+                            <span>{idx === 0 ? '1 · 썸네일' : `${idx + 1}번 사진`}</span>
+                            <button disabled={idx===0} aria-label={`${idx+1}번 사진 앞으로`} onClick={()=>{const items=[...(selectedProject.images||[])];[items[idx-1],items[idx]]=[items[idx],items[idx-1]];updateProject(selectedProject.id,'images',items);}}>← 앞으로</button>
+                            <button disabled={idx===(selectedProject.images||[]).length-1} aria-label={`${idx+1}번 사진 뒤로`} onClick={()=>{const items=[...(selectedProject.images||[])];[items[idx],items[idx+1]]=[items[idx+1],items[idx]];updateProject(selectedProject.id,'images',items);}}>뒤로 →</button>
+                            <button disabled={idx===0} onClick={()=>{const items=[...(selectedProject.images||[])];const [first]=items.splice(idx,1);items.unshift(first);updateProject(selectedProject.id,'images',items);}}>썸네일로</button>
+                          </div>
+                        )}
                         {isEditMode && (
                           <div className="flex gap-2 px-2">
                             <input 
