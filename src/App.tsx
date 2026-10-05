@@ -900,7 +900,7 @@ function PortfolioApp() {
       <div className="editor-preview">
         <PublicPortfolio editor={{data,active:isEditMode,select:setSelectedProjectId,text:(path,value)=><EditableText value={value} multiline={path.endsWith("description")} style={data.textStyles?.[path] ? {fontSize:data.textStyles[path].size,color:data.textStyles[path].color,opacity:data.textStyles[path].opacity} : {}} onChange={v=>updateField(path,v)} isEditMode={isEditMode} path={path} selectedPath={selectedPath} onSelect={setSelectedPath}/>}}/>
       </div>
-      <details className="legacy-fields"><summary>스튜디오 정보 · 이미지 · 스타일 수정 (기존 편집 도구)</summary>
+      <details className="legacy-fields"><summary>이미지 · 세부 설정</summary>
       {/* Hero Section */}
       <section className="relative pt-[80px] md:pt-[100px] lg:pt-[130px] pb-20 px-6 max-w-7xl mx-auto z-10">
         <motion.div
@@ -979,7 +979,7 @@ function PortfolioApp() {
         </motion.div>
       </section>
 
-      {/* 01. Intro Section */}
+      {/* Intro Section */}
       <section className="relative py-32 px-6 max-w-4xl mx-auto z-10">
         <motion.div
           initial={{ opacity: 0 }}
@@ -1016,7 +1016,7 @@ function PortfolioApp() {
         </motion.div>
       </section>
 
-      {/* 02. Works Section (Swapped) */}
+      {/* 01 / Works Section (Swapped) */}
       <section className="relative py-16 px-6 max-w-7xl mx-auto z-10">
         <div className="flex flex-col items-center mb-12">
           <div className="inline-block px-4 py-1 glass rounded-full tracking-widest uppercase mb-6 font-sans font-medium" style={getTextStyle('worksLabel', 'accent')}>
@@ -1248,7 +1248,7 @@ function PortfolioApp() {
       <section className="relative py-16 px-6 max-w-7xl mx-auto z-10">
         <div className="space-y-12 flex flex-col items-center">
           <div className="inline-block px-4 py-1 glass rounded-full tracking-widest uppercase font-sans font-medium" style={getTextStyle('aboutLabel', 'accent')}>
-            03. About Designer
+            02 / About Designer
           </div>
           
           <div className="grid grid-cols-[0.6fr_1.4fr] md:grid-cols-[0.4fr_1.6fr] gap-x-6 md:gap-x-20 gap-y-8 md:gap-y-4 items-start w-full">
@@ -1422,7 +1422,7 @@ function PortfolioApp() {
       </section>
 
 
-      {/* 04. Contact Section */}
+      {/* 03 / Contact Section */}
       <section className="relative py-12 md:py-32 px-6 max-w-7xl mx-auto z-10">
         <div className="glass rounded-[32px] md:rounded-[40px] p-6 md:p-20 flex flex-col items-center text-center space-y-6 md:space-y-12 overflow-hidden relative">
           <div className="atmosphere absolute inset-0 opacity-20 scale-150 capture-ignore" />
