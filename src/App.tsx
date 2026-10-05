@@ -39,75 +39,9 @@ import {
 import { GoogleGenAI } from "@google/genai";
 import { cn } from './lib/utils';
 import { PortfolioData, Project } from './types';
-import { INITIAL_DATA } from './constants';
-import { db, auth } from './firebase';
-import { 
-  doc, 
-  onSnapshot, 
-  setDoc, 
-  getDocFromServer,
-  collection
-} from 'firebase/firestore';
-import { 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  onAuthStateChanged,
-  signOut,
-  User
-} from 'firebase/auth';
-
-// Error Handling Spec for Firestore
-enum OperationType {
-  CREATE = 'create',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  LIST = 'list',
-  GET = 'get',
-  WRITE = 'write',
-}
-
-interface FirestoreErrorInfo {
-  error: string;
-  operationType: OperationType;
-  path: string | null;
-  authInfo: {
-    userId: string | undefined;
-    email: string | null | undefined;
-    emailVerified: boolean | undefined;
-    isAnonymous: boolean | undefined;
-    tenantId: string | null | undefined;
-    providerInfo: {
-      providerId: string;
-      displayName: string | null;
-      email: string | null;
-      photoUrl: string | null;
-    }[];
-  }
-}
-
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData.map(provider => ({
-        providerId: provider.providerId,
-        displayName: provider.displayName,
-        email: provider.email,
-        photoUrl: provider.photoURL
-      })) || []
-    },
-    operationType,
-    path
-  }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
-}
-
+import { INITIAL_DATA as LEGACY_DATA } from './constants';
+import projectData from './portfolio.json';
+const INITIAL_DATA = {...LEGACY_DATA,...projectData} as unknown as PortfolioData;
 // Error Boundary Component
 class ErrorBoundary extends React.Component<any, any> {
   state: any;
@@ -320,7 +254,6 @@ const compressBase64Image = (base64: string, maxWidth = 800, quality = 0.6): Pro
 };
 
 function PortfolioApp() {
-  const [sessionTimestamp] = useState(Date.now());
   const [data, setData] = useState<PortfolioData>(() => {
     try {
       const draft = localStorage.getItem('portfolio_draft');
@@ -356,9 +289,6 @@ function PortfolioApp() {
   const [showDesignerPhotoModal, setShowDesignerPhotoModal] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthReady, setIsAuthReady] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [displayProjects, setDisplayProjects] = useState<Project[]>(data.projects);
 
@@ -368,79 +298,15 @@ function PortfolioApp() {
     }
   }, [isEditMode, data.projects]);
 
-  const isAdmin = user?.email === "wnsworla00@gmail.com";
-
-  const login = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
-  };
-
-  const logout = () => signOut(auth);
-
-  const saveToFirebase = async (newData: PortfolioData): Promise<boolean> => {
-    if (!isAdmin) {
-      alert("Admin 권한이 없습니다. 로그인이 필요합니다.");
-      return false;
-    }
-
+  const saveProject = async () => {
     setIsSaving(true);
     try {
-      // Update display projects on save
-      setDisplayProjects(newData.projects);
-
-      let dataToSave = { ...newData };
-      let jsonString = JSON.stringify(dataToSave);
-      let sizeInBytes = new Blob([jsonString]).size;
-
-      if (sizeInBytes > 900000) { // ~900KB to be safe
-        setIsLoading(true);
-        try {
-          if (dataToSave.logoUrl) dataToSave.logoUrl = await compressBase64Image(dataToSave.logoUrl, 600, 0.5);
-          if (dataToSave.mainTitleImageUrl) dataToSave.mainTitleImageUrl = await compressBase64Image(dataToSave.mainTitleImageUrl, 800, 0.5);
-          if (dataToSave.studioNameHanjaUrl) dataToSave.studioNameHanjaUrl = await compressBase64Image(dataToSave.studioNameHanjaUrl, 600, 0.5);
-          if (dataToSave.designerPhoto) dataToSave.designerPhoto = await compressBase64Image(dataToSave.designerPhoto, 600, 0.5);
-          
-          dataToSave.projects = await Promise.all(dataToSave.projects.map(async (project) => {
-            if (!project.images) return project;
-            const compressedImages = await Promise.all(project.images.map(img => compressBase64Image(img, 600, 0.5)));
-            return { ...project, images: compressedImages };
-          }));
-
-          jsonString = JSON.stringify(dataToSave);
-          sizeInBytes = new Blob([jsonString]).size;
-        } catch (e) {
-          console.error("Compression failed", e);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-
-      if (sizeInBytes > 950000) {
-        alert(`데이터 용량이 너무 큽니다! (현재: ${(sizeInBytes / 1024 / 1024).toFixed(2)}MB / 최대: 1MB)\n이미지 크기를 줄이거나 외부 링크를 사용해주세요.`);
-        return false;
-      }
-
-      const path = 'portfolios/main';
-      console.log("Saving to Firebase:", dataToSave);
-      await setDoc(doc(db, path), dataToSave);
-      
-      setData(dataToSave);
-      console.log("Successfully saved to Firestore.");
-      alert("성공적으로 서버에 저장되었습니다. 변경사항을 확인하기 위해 페이지를 새로고침합니다.");
-      window.location.reload();
-      return true;
-    } catch (error) {
-      console.error("Save failed:", error);
-      alert("저장에 실패했습니다. 관리자 권한을 확인하거나 네트워크 상태를 체크해주세요.");
-      handleFirestoreError(error, OperationType.WRITE, 'portfolios/main');
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
+      const response=await fetch('/__editor/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      if(!response.ok) throw new Error('저장 실패');
+      setIsEditMode(false);setBackupData(null);
+      alert('프로젝트에 저장했습니다. 공개 사이트 반영은 ChatGPT에 요청해 주세요.');
+    } catch(error){alert('프로젝트에 저장하지 못했습니다. 수정 내용은 임시로 보관했습니다.');}
+    finally{setIsSaving(false);}
   };
 
   const exportData = () => {
@@ -584,76 +450,6 @@ function PortfolioApp() {
     return indexA - indexB;
   });
 
-  // Auth state listener
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setIsAuthReady(true);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Firestore connection test
-  useEffect(() => {
-    async function testConnection() {
-      try {
-        await getDocFromServer(doc(db, 'test', 'connection'));
-      } catch (error) {
-        if(error instanceof Error && error.message.includes('the client is offline')) {
-          console.error("Please check your Firebase configuration.");
-        }
-      }
-    }
-    testConnection();
-  }, []);
-
-  // Load data from Firestore
-  useEffect(() => {
-    if (!isAuthReady) return;
-
-    const path = 'portfolios/main';
-    const unsubscribe = onSnapshot(doc(db, path), (snapshot) => {
-      if (snapshot.exists()) {
-        const remoteData = snapshot.data() as PortfolioData;
-        
-        // If we are in edit mode, we only update if the remote data is newer or if we just saved
-        if (isEditModeRef.current) {
-          setIsLoading(false);
-          return;
-        }
-
-        setData(prev => {
-          const remoteData = snapshot.data() as PortfolioData;
-          // 로고가 base64 형태거나 예전 파일 경로면 사용자 제공 링크로 강제 교체
-          if (remoteData.logoUrl && (remoteData.logoUrl.startsWith('data:image') || remoteData.logoUrl === '/logo.png')) {
-            remoteData.logoUrl = INITIAL_DATA.logoUrl;
-          }
-          const merged = {
-            ...INITIAL_DATA,
-            ...remoteData,
-            logoUrl: remoteData.logoUrl || INITIAL_DATA.logoUrl,
-            style: { ...INITIAL_DATA.style, ...(remoteData.style || {}) },
-            fonts: { ...INITIAL_DATA.fonts, ...(remoteData.fonts || {}) },
-            textStyles: { 
-              ...INITIAL_DATA.textStyles, 
-              ...(remoteData.textStyles || {}) 
-            }
-          };
-          
-          // Sync display projects when loading from server
-          setDisplayProjects(merged.projects);
-          return merged;
-        });
-      }
-      setIsLoading(false);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.GET, path);
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [isAuthReady]);
-
   // Apply dynamic fonts
   useEffect(() => {
     document.documentElement.style.setProperty('--font-sans', data.fonts.sans);
@@ -662,7 +458,7 @@ function PortfolioApp() {
 
   // Migration for Google Drive links
   useEffect(() => {
-    if (isLoading) return;
+
     
     let changed = false;
     const newData = JSON.parse(JSON.stringify(data));
@@ -687,11 +483,12 @@ function PortfolioApp() {
       setData(newData);
       setDisplayProjects(newData.projects);
     }
-  }, [isLoading]);
+  }, []);
 
   const [currentSize, setCurrentSize] = useState(0);
   const [bulkUrls, setBulkUrls] = useState("");
-  const [showBulkInput, setShowBulkInput] = useState(false);
+  const [showBulkInput, setShowBulkInput] = useState(true);
+  const orderedPhotoLinks = bulkUrls.split(/[\s,]+/).map(url=>url.trim()).filter(url=>/^https?:\/\//i.test(url));
 
   const fixAllDriveLinks = () => {
     let count = 0;
@@ -879,7 +676,7 @@ function PortfolioApp() {
       return (
         <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-mono opacity-40">
           <Sparkles className="w-3 h-3" />
-          Select text to edit style
+          글을 누르면 내용과 모양을 수정할 수 있어요.
         </div>
       );
     }
@@ -902,10 +699,10 @@ function PortfolioApp() {
     return (
       <div className="flex items-center gap-4 text-[10px] uppercase tracking-widest font-mono">
         <div className="flex items-center gap-2 p-2 glass rounded-xl border border-white/10">
-          <div className="text-orange-500 font-bold truncate max-w-[80px]">{selectedPath}</div>
+          <div className="text-orange-500 font-bold truncate max-w-[80px]">선택한 글</div>
           <div className="flex items-center gap-3 border-l border-white/10 pl-3">
             <div className="flex flex-col gap-1">
-              <span className="opacity-40">Size (px)</span>
+              <span className="opacity-40">글자 크기</span>
               <input 
                 type="number"
                 value={currentStyle.size} 
@@ -914,7 +711,7 @@ function PortfolioApp() {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <span className="opacity-40">Color</span>
+              <span className="opacity-40">색상</span>
               <input 
                 type="color"
                 value={currentStyle.color} 
@@ -923,7 +720,7 @@ function PortfolioApp() {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <span className="opacity-40">Opacity</span>
+              <span className="opacity-40">진하기</span>
               <input 
                 type="range"
                 min="0"
@@ -943,7 +740,7 @@ function PortfolioApp() {
                 });
               }}
               className="p-1 hover:text-red-500 transition-colors"
-              title="Reset to default"
+              title="글자 모양 초기화"
             >
               <Trash2 className="w-3 h-3" />
             </button>
@@ -952,14 +749,6 @@ function PortfolioApp() {
       </div>
     );
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="editor-root relative min-h-screen overflow-hidden selection:bg-orange-500/30" style={{ fontFamily: 'var(--font-sans)' }}>
@@ -981,69 +770,19 @@ function PortfolioApp() {
           </div>
           <div className="flex items-center gap-1 md:gap-4">
             {isEditMode && (
-              <div className="hidden lg:flex items-center gap-4 glass px-4 py-1 rounded-full">
-                <div className="flex items-center gap-2 text-xs opacity-60">
-                  <Type className="w-3 h-3" /> Sans:
-                  <input 
-                    value={data.fonts.sans} 
-                    onChange={(e) => updateField('fonts.sans', e.target.value)}
-                    className="bg-transparent border-b border-white/20 w-24 focus:outline-none"
-                  />
-                </div>
-                <div className="flex items-center gap-2 text-xs opacity-60">
-                  <Type className="w-3 h-3" /> Serif:
-                  <input 
-                    value={data.fonts.serif} 
-                    onChange={(e) => updateField('fonts.serif', e.target.value)}
-                    className="bg-transparent border-b border-white/20 w-24 focus:outline-none"
-                  />
-                </div>
-                <div className="flex items-center gap-2 border-l border-white/10 pl-4">
+              <div className="editor-options">
+                <label className="font-picker">글꼴 <select aria-label="글꼴 선택" value={data.fonts.sans} onChange={e=>updateField('fonts.sans',e.target.value)}><option value={data.fonts.sans}>현재 글꼴</option><option value="'Noto Sans KR', sans-serif">본고딕 · 깔끔하게</option><option value="'Nanum Gothic', sans-serif">나눔고딕 · 부드럽게</option><option value="'Noto Serif KR', serif">본명조 · 단정하게</option><option value="'Nanum Myeongjo', serif">나눔명조 · 고전적으로</option><option value="'Inter', 'Noto Sans KR', sans-serif">인터 · 모던하게</option></select></label>
+                <details className="editor-advanced"><summary>추가 도구</summary><div className="advanced-content">
                   <button 
-                    onClick={async () => {
-                      if (confirm("Do you want to restore data from the server? Your current unsaved changes will be lost.")) {
-                        setIsLoading(true);
-                        const path = 'portfolios/main';
-                        try {
-                          const snap = await getDocFromServer(doc(db, path));
-                          if (snap.exists()) {
-                            const remoteData = snap.data() as PortfolioData;
-                            // 로고가 base64 형태면 무시하고 기본 logo.png를 사용하도록 강제함
-                            if (remoteData.logoUrl && remoteData.logoUrl.startsWith('data:image')) {
-                              remoteData.logoUrl = '/logo.png';
-                            }
-                            const merged = {
-                              ...INITIAL_DATA,
-                              ...remoteData,
-                              logoUrl: remoteData.logoUrl || '/logo.png',
-                              style: { ...INITIAL_DATA.style, ...(remoteData.style || {}) },
-                              fonts: { ...INITIAL_DATA.fonts, ...(remoteData.fonts || {}) },
-                              textStyles: { 
-                                ...INITIAL_DATA.textStyles, 
-                                ...(remoteData.textStyles || {}) 
-                              }
-                            };
-                            setData(merged);
-                            setDisplayProjects(merged.projects);
-                            alert("Server data has been restored.");
-                          } else {
-                            alert("No data found on the server.");
-                          }
-                        } catch (e) {
-                          console.error(e);
-                          alert("An error occurred while restoring data.");
-                        }
-                        setIsLoading(false);
-                      }
-                    }}
+                    onClick={() => {if(confirm('마지막으로 프로젝트에 저장한 내용을 불러올까요? 저장하지 않은 수정 내용은 사라집니다.'))setData(INITIAL_DATA);}}
                     className="flex items-center gap-2 px-4 py-2 glass rounded-full text-[10px] uppercase tracking-widest font-mono text-white/60 hover:text-orange-500 transition-colors"
                   >
                     <RefreshCw className="w-3 h-3" />
-                    Restore from Server
+                    저장한 내용 불러오기
                   </button>
 
                   <div className="flex flex-col items-end gap-1 px-4 border-l border-white/10">
-                    <div className="text-[9px] uppercase tracking-tighter text-white/40 font-mono">Storage Status</div>
+                    <div className="text-[9px] uppercase tracking-tighter text-white/40 font-mono">저장 공간</div>
                     <div className="flex items-center gap-2">
                       <div className="w-24 h-1 bg-white/10 rounded-full overflow-hidden">
                         <div 
@@ -1068,7 +807,7 @@ function PortfolioApp() {
                     className="flex items-center gap-2 px-4 py-2 bg-orange-500/20 text-orange-500 border border-orange-500/30 rounded-full text-[10px] uppercase tracking-widest font-mono hover:bg-orange-500 hover:text-white transition-all"
                   >
                     <LinkIcon className="w-3 h-3" />
-                    Force Fix All Google Drive Links
+                    사진 연결 정리
                   </button>
 
                   <button 
@@ -1077,25 +816,25 @@ function PortfolioApp() {
                       window.location.reload();
                     }}
                     className="p-1.5 glass rounded-lg hover:bg-red-500/20 text-red-500 transition-all"
-                    title="Clear Local Cache & Reload"
+                    title="임시 내용 지우기"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-3.5 h-3.5" />임시 내용 지우기
                   </button>
                   <button 
                     onClick={exportData}
                     className="p-1.5 glass rounded-lg hover:bg-white/10 transition-all"
-                    title="Export Data (JSON)"
+                    title="내용 파일 내려받기"
                   >
-                    <Download className="w-3.5 h-3.5" />
+                    <Download className="w-3.5 h-3.5" />파일 내려받기
                   </button>
                   <button 
                     onClick={importData}
                     className="p-1.5 glass rounded-lg hover:bg-white/10 transition-all"
-                    title="Import Data (JSON)"
+                    title="내용 파일 가져오기"
                   >
-                    <Upload className="w-3.5 h-3.5" />
+                    <Upload className="w-3.5 h-3.5" />파일 가져오기
                   </button>
-                </div>
+                </div></details>
               </div>
             )}
             <div className="flex items-center gap-1 md:gap-2 capture-ignore">
@@ -1111,33 +850,10 @@ function PortfolioApp() {
                         className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 rounded-full glass hover:bg-red-500/20 text-red-500 transition-all text-[10px] md:text-sm font-medium cursor-pointer"
                       >
                         <X className="w-3 h-3 md:w-4 md:h-4" />
-                        Cancel
+                        취소
                       </button>
                       <button 
-                        onClick={async (e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          if (isSaving) return;
-                          
-                          if (!isAdmin) {
-                            console.log("Admin check failed. Current user email:", user?.email);
-                            alert("Admin login is required to save to the server. Your changes have been temporarily saved to this browser only.");
-                            setIsEditMode(false);
-                            setBackupData(null);
-                            return;
-                          }
-
-                          try {
-                            const success = await saveToFirebase(data);
-                            if (success) {
-                              setIsEditMode(false);
-                              setBackupData(null);
-                            }
-                          } catch (err) {
-                            console.error("Save failed in button handler:", err);
-                            alert("An error occurred while saving. Please check the console.");
-                          }
-                        }}
+                        onClick={saveProject}
                         disabled={isSaving}
                         className={cn(
                           "flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-orange-500 text-white transition-all text-[10px] md:text-sm font-medium shadow-lg shadow-orange-500/20 active:scale-95 hover:bg-orange-600 cursor-pointer",
@@ -1147,25 +863,18 @@ function PortfolioApp() {
                         {isSaving ? (
                           <>
                             <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
-                            Saving...
+                            저장 중…
                           </>
                         ) : (
                           <>
                             <Check className="w-3 h-3 md:w-4 md:h-4" />
-                            Save
+                            저장
                           </>
                         )}
                       </button>
                     </>
                   ) : (
                     <>
-                      {isAdmin && (
-                        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/20 text-orange-500 text-[9px] font-bold uppercase tracking-widest border border-orange-500/30">
-                          <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-                          Admin
-                        </div>
-                      )}
-                      {(isAdmin || !user) && (
                         <button 
                           onClick={() => {
                             setBackupData(JSON.parse(JSON.stringify(data)));
@@ -1174,26 +883,8 @@ function PortfolioApp() {
                           className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 rounded-full glass hover:bg-white/10 transition-all text-[10px] md:text-sm font-medium cursor-pointer"
                         >
                           <Edit3 className="w-3 h-3 md:w-4 md:h-4" />
-                          Edit
+                          편집
                         </button>
-                      )}
-                      {user ? (
-                        <button 
-                          onClick={logout}
-                          className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 rounded-full glass hover:bg-white/10 transition-all text-[10px] md:text-sm font-medium cursor-pointer"
-                        >
-                          <LogOut className="w-3 h-3 md:w-4 md:h-4" />
-                          Logout
-                        </button>
-                      ) : (
-                        <button 
-                          onClick={login}
-                          className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 rounded-full glass hover:bg-white/10 transition-all text-[10px] md:text-sm font-medium cursor-pointer"
-                        >
-                          <LogIn className="w-3 h-3 md:w-4 md:h-4" />
-                          Login
-                        </button>
-                      )}
                     </>
                   )
               )}
@@ -1219,7 +910,7 @@ function PortfolioApp() {
       </div>
 
       <div className="editor-preview">
-        <PublicPortfolio editor={{data,active:isEditMode,select:setSelectedProjectId,text:(path,value)=><EditableText value={value} onChange={v=>updateField(path,v)} isEditMode={isEditMode} path={path} selectedPath={selectedPath} onSelect={setSelectedPath}/>}}/>
+        <PublicPortfolio editor={{data,active:isEditMode,select:setSelectedProjectId,text:(path,value)=><EditableText value={value} multiline={path.endsWith("description")} style={data.textStyles?.[path] ? {fontSize:data.textStyles[path].size,color:data.textStyles[path].color,opacity:data.textStyles[path].opacity} : {}} onChange={v=>updateField(path,v)} isEditMode={isEditMode} path={path} selectedPath={selectedPath} onSelect={setSelectedPath}/>}}/>
       </div>
       <details className="legacy-fields"><summary>스튜디오 정보 · 이미지 · 스타일 수정 (기존 편집 도구)</summary>
       {/* Hero Section */}
@@ -1925,7 +1616,7 @@ function PortfolioApp() {
                 {/* Meta Info */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 border-y border-white/5 py-12">
                   <div className="space-y-3">
-                    <h4 className="text-orange-500 font-mono text-[10px] tracking-widest uppercase opacity-40">Role</h4>
+                    <h4 className="text-orange-500 font-mono text-[10px] tracking-widest uppercase opacity-40">담당 역할</h4>
                     <div className="font-light opacity-80" style={getTextStyle(`projects.${selectedProject.id}.role`, 'h2')}>
                       <EditableText 
                         value={selectedProject.role} 
@@ -1939,7 +1630,7 @@ function PortfolioApp() {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <h4 className="text-orange-500 font-mono text-[10px] tracking-widest uppercase opacity-40">Location</h4>
+                    <h4 className="text-orange-500 font-mono text-[10px] tracking-widest uppercase opacity-40">공연 장소</h4>
                     <div className="font-light opacity-80" style={getTextStyle(`projects.${selectedProject.id}.location`, 'h2')}>
                       <EditableText 
                         value={selectedProject.location || ""} 
@@ -1960,13 +1651,13 @@ function PortfolioApp() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 text-orange-500 font-mono text-[11px] uppercase tracking-[0.2em]">
                         <LinkIcon className="w-4 h-4" />
-                        Bulk Add Image URLs
+                        사진 링크 여러 개 추가
                       </div>
                       <button 
                         onClick={() => setShowBulkInput(!showBulkInput)}
                         className="px-4 py-1.5 glass rounded-full text-[10px] uppercase tracking-widest text-white/40 hover:text-white transition-all"
                       >
-                        {showBulkInput ? "Close Input" : "Open Bulk Input"}
+                        {showBulkInput ? "접기" : "여러 개 입력"}
                       </button>
                     </div>
                     
@@ -1977,8 +1668,7 @@ function PortfolioApp() {
                         className="space-y-4"
                       >
                         <p className="text-[10px] text-white/30 leading-relaxed">
-                          여러 개의 이미지 주소를 한꺼번에 넣을 수 있습니다. <br/>
-                          주소들을 **엔터(줄바꿈)**나 **쉼표(,)**로 구분해서 아래 칸에 붙여넣어 주세요.
+                          사진 링크를 한 줄에 하나씩 붙여넣어 주세요. 위에서 아래 순서대로 추가됩니다.<br/>기존 사진 뒤에 이어 붙이며, 첫 번째 사진이 썸네일입니다.
                         </p>
                         <textarea 
                           value={bulkUrls}
@@ -1988,19 +1678,21 @@ function PortfolioApp() {
                         />
                         <button 
                           onClick={() => {
-                            const urls = bulkUrls.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0).map(formatImageUrl);
+                            const existing=(selectedProject.images || []).filter(url=>url.trim());
+                            const urls=[...new Set(orderedPhotoLinks.map(formatImageUrl))].filter(url=>!existing.includes(url));
                             if (urls.length > 0) {
-                              const newImages = [...(selectedProject.images || []), ...urls];
+                              const newImages = [...existing, ...urls];
                               updateProject(selectedProject.id, 'images', newImages);
                               setBulkUrls("");
                               setShowBulkInput(false);
-                              alert(`${urls.length}개의 이미지가 추가되었습니다.`);
+                              alert(`${urls.length}장의 사진을 입력 순서대로 추가했습니다.`);
                             }
                           }}
-                          className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
+                          disabled={!orderedPhotoLinks.length}
+                          className="disabled:opacity-40 w-full py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
                         >
                           <Check className="w-4 h-4" />
-                          Add {bulkUrls.split(/[\n,]+/).filter(u => u.trim().length > 0).length} Images Now
+                          {orderedPhotoLinks.length}개 링크 순서대로 추가
                         </button>
                       </motion.div>
                     )}
@@ -2073,10 +1765,10 @@ function PortfolioApp() {
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <h4 className="text-orange-500 font-mono text-xs tracking-widest uppercase opacity-60">Visuals</h4>
+                    <h4 className="text-orange-500 font-mono text-xs tracking-widest uppercase opacity-60">공연 사진</h4>
                     {isEditMode && (
                       <div className="flex items-center gap-4">
-                        <span className="text-[10px] text-white/40 uppercase tracking-widest">Drag & Drop Images Here</span>
+                        <span className="text-[10px] text-white/40 uppercase tracking-widest">사진을 여기에 놓아 주세요</span>
                         <button 
                           onClick={() => {
                             const newImages = [...(selectedProject.images || []), ""];
@@ -2105,7 +1797,7 @@ function PortfolioApp() {
                             <img src={img || undefined} alt="" className="w-full h-full object-cover opacity-90 group-hover/img:opacity-100 transition-all duration-700 hover:scale-105" referrerPolicy="no-referrer" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-white/5 text-white/20 text-xs font-mono">
-                              No Image URL
+                              사진 링크를 입력해 주세요
                             </div>
                           )}
                         </div>
@@ -2154,7 +1846,7 @@ function PortfolioApp() {
                         <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
                           <Plus className="w-6 h-6" />
                         </div>
-                        <span className="text-xs font-mono tracking-widest uppercase opacity-40">Add Image</span>
+                        <span className="text-xs font-mono tracking-widest uppercase opacity-40">사진 추가</span>
                       </button>
                     )}
                   </div>
