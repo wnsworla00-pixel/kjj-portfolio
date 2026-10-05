@@ -12,7 +12,7 @@
   "textStyles": {
     "copyright": {
       "opacity": 0.6,
-      "color": "#f97316",
+      "color": "#21F1A8",
       "size": 8
     },
     "about.name": {
@@ -26,7 +26,7 @@
       "opacity": 0.8
     },
     "heroSub": {
-      "color": "#ea875d",
+      "color": "#21F1A8",
       "opacity": 0.8,
       "size": 9
     },
@@ -388,7 +388,7 @@
     "projects.1774952388257.year": {
       "opacity": 1,
       "size": 12,
-      "color": "#b75e15"
+      "color": "#21F1A8"
     },
     "intro.description": {
       "size": 12,
@@ -507,7 +507,7 @@
     },
     "about.role": {
       "opacity": 1,
-      "color": "#eb6c05",
+      "color": "#21F1A8",
       "size": 9
     },
     "projects.1774901873376.year": {
@@ -1545,7 +1545,7 @@
     "h1Size": 20,
     "h2Opacity": 0.9,
     "bodyOpacity": 0.6,
-    "accentColor": "#f97316",
+    "accentColor": "#21F1A8",
     "hanjaColor": "#FFFFFF"
   },
   "contentSource": "project"

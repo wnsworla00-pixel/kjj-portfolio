@@ -55,6 +55,8 @@ export interface PortfolioData {
     quote: string;
     description: string;
     education?: string[];
+    businessCardBackground?: string;
+    businessCardPdf?: string;
   };
   contact: {
     email: string;

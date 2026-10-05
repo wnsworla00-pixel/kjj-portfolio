@@ -67,7 +67,7 @@ class ErrorBoundary extends React.Component<any, any> {
             <p className="opacity-70 text-sm leading-relaxed">{errorMessage}</p>
             <button 
               onClick={() => window.location.reload()}
-              className="w-full py-3 bg-orange-500 rounded-full font-medium hover:bg-orange-600 transition-all"
+              className="w-full py-3 bg-[#21F1A8] rounded-full font-medium hover:bg-[#21F1A8] transition-all"
             >
               Reload Application
             </button>
@@ -147,7 +147,7 @@ const EditableText = ({
     <div 
       className={cn(
         "relative group/edit",
-        isSelected && "ring-2 ring-orange-500 ring-offset-2 ring-offset-black rounded-sm"
+        isSelected && "ring-2 ring-[#21F1A8] ring-offset-2 ring-offset-black rounded-sm"
       )}
       onClick={(e) => {
         e.stopPropagation();
@@ -164,7 +164,7 @@ const EditableText = ({
           }}
           onBlur={handleBlur}
           className={cn(
-            "w-full bg-white/10 border border-white/20 rounded p-2 focus:outline-none focus:border-orange-500 whitespace-pre-wrap resize-none overflow-hidden", 
+            "w-full bg-white/10 border border-white/20 rounded p-2 focus:outline-none focus:border-[#21F1A8] whitespace-pre-wrap resize-none overflow-hidden", 
             className
           )}
           style={{...style, minHeight: '100px'}}
@@ -184,13 +184,13 @@ const EditableText = ({
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           className={cn(
-            "bg-white/10 border border-white/20 rounded px-2 py-1 focus:outline-none focus:border-orange-500", 
+            "bg-white/10 border border-white/20 rounded px-2 py-1 focus:outline-none focus:border-[#21F1A8]", 
             className
           )}
           style={style}
         />
       )}
-      <div className="absolute -top-6 left-0 bg-orange-500 text-[8px] px-1 rounded opacity-0 group-hover/edit:opacity-100 transition-opacity pointer-events-none uppercase tracking-tighter">
+      <div className="absolute -top-6 left-0 bg-[#21F1A8] text-[8px] px-1 rounded opacity-0 group-hover/edit:opacity-100 transition-opacity pointer-events-none uppercase tracking-tighter">
         {path}
       </div>
     </div>
@@ -247,7 +247,7 @@ function PortfolioApp() {
   const [data, setData] = useState<PortfolioData>(() => {
     try {
       const draft = localStorage.getItem('portfolio_draft');
-      if (draft) return JSON.parse(draft);
+      if (draft) {const parsed=JSON.parse(draft);for(const style of Object.values(parsed.textStyles||{}) as {color:string}[]){if(/^#(?:f97316|b75e15|ea875d|eb6c05)$/i.test(style.color))style.color="#21F1A8";}if(parsed.style)parsed.style.accentColor="#21F1A8";return parsed;}
     } catch (e) {
       console.error("Failed to load draft", e);
     }
@@ -561,7 +561,7 @@ function PortfolioApp() {
         h2: { size: 15, color: "#FFFFFF", opacity: 1 },
         h3: { size: 13, color: "#FFFFFF", opacity: 1 },
         body: { size: 13, color: "#FFFFFF", opacity: 1 },
-        accent: { size: 12, color: "#f97316", opacity: 0.8 }
+        accent: { size: 12, color: "#21F1A8", opacity: 0.8 }
       };
       const s = type ? defaults[type] : defaults.body;
       size = s.size;
@@ -687,7 +687,7 @@ function PortfolioApp() {
     return (
       <div className="flex items-center gap-4 text-[10px] uppercase tracking-widest font-mono">
         <div className="flex items-center gap-2 p-2 glass rounded-xl border border-white/10">
-          <div className="text-orange-500 font-bold truncate max-w-[80px]">선택한 글</div>
+          <div className="text-[#21F1A8] font-bold truncate max-w-[80px]">선택한 글</div>
           <div className="flex items-center gap-3 border-l border-white/10 pl-3">
             <div className="flex flex-col gap-1">
               <span className="opacity-40">글자 크기</span>
@@ -695,7 +695,7 @@ function PortfolioApp() {
                 type="number"
                 value={currentStyle.size} 
                 onChange={(e) => updateStyle('size', parseInt(e.target.value) || 0)}
-                className="bg-white/5 border border-white/10 rounded px-1 w-10 focus:outline-none focus:border-orange-500"
+                className="bg-white/5 border border-white/10 rounded px-1 w-10 focus:outline-none focus:border-[#21F1A8]"
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -716,7 +716,7 @@ function PortfolioApp() {
                 step="0.1"
                 value={currentStyle.opacity} 
                 onChange={(e) => updateStyle('opacity', parseFloat(e.target.value))}
-                className="w-12 accent-orange-500"
+                className="w-12 accent-[#21F1A8]"
               />
             </div>
             <button 
@@ -739,7 +739,7 @@ function PortfolioApp() {
   };
 
   return (
-    <div className="editor-root relative min-h-screen overflow-hidden selection:bg-orange-500/30" style={{ fontFamily: 'var(--font-sans)' }}>
+    <div className="editor-root relative min-h-screen overflow-hidden selection:bg-[#21F1A8]/30" style={{ fontFamily: 'var(--font-sans)' }}>
       {/* Atmospheric Background */}
       <div className="legacy-atmosphere fixed inset-0 z-0 overflow-hidden">
         <div className="atmosphere absolute inset-0 capture-ignore" />
@@ -763,7 +763,7 @@ function PortfolioApp() {
                 <details className="editor-advanced"><summary>추가 도구</summary><div className="advanced-content">
                   <button 
                     onClick={() => {if(confirm('마지막으로 프로젝트에 저장한 내용을 불러올까요? 저장하지 않은 수정 내용은 사라집니다.'))setData(INITIAL_DATA);}}
-                    className="flex items-center gap-2 px-4 py-2 glass rounded-full text-[10px] uppercase tracking-widest font-mono text-white/60 hover:text-orange-500 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 glass rounded-full text-[10px] uppercase tracking-widest font-mono text-white/60 hover:text-[#21F1A8] transition-colors"
                   >
                     <RefreshCw className="w-3 h-3" />
                     저장한 내용 불러오기
@@ -776,7 +776,7 @@ function PortfolioApp() {
                         <div 
                           className={cn(
                             "h-full transition-all duration-500",
-                            (currentSize / 1048576) > 0.9 ? "bg-red-500" : (currentSize / 1048576) > 0.7 ? "bg-orange-500" : "bg-emerald-500"
+                            (currentSize / 1048576) > 0.9 ? "bg-red-500" : (currentSize / 1048576) > 0.7 ? "bg-[#21F1A8]" : "bg-emerald-500"
                           )}
                           style={{ width: `${Math.min(100, (currentSize / 1048576) * 100)}%` }}
                         />
@@ -792,7 +792,7 @@ function PortfolioApp() {
 
                   <button 
                     onClick={fixAllDriveLinks}
-                    className="flex items-center gap-2 px-4 py-2 bg-orange-500/20 text-orange-500 border border-orange-500/30 rounded-full text-[10px] uppercase tracking-widest font-mono hover:bg-orange-500 hover:text-white transition-all"
+                    className="flex items-center gap-2 px-4 py-2 bg-[#21F1A8]/20 text-[#21F1A8] border border-[#21F1A8]/30 rounded-full text-[10px] uppercase tracking-widest font-mono hover:bg-[#21F1A8] hover:text-white transition-all"
                   >
                     <LinkIcon className="w-3 h-3" />
                     사진 연결 정리
@@ -844,7 +844,7 @@ function PortfolioApp() {
                         onClick={saveProject}
                         disabled={isSaving}
                         className={cn(
-                          "flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-orange-500 text-white transition-all text-[10px] md:text-sm font-medium shadow-lg shadow-orange-500/20 active:scale-95 hover:bg-orange-600 cursor-pointer",
+                          "flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-[#21F1A8] text-white transition-all text-[10px] md:text-sm font-medium shadow-lg shadow-[#21F1A8]/20 active:scale-95 hover:bg-[#21F1A8] cursor-pointer",
                           isSaving && "opacity-70 cursor-not-allowed"
                         )}
                       >
@@ -913,7 +913,7 @@ function PortfolioApp() {
           <div 
             className={cn(
               "relative group/logo flex flex-col items-center w-full max-w-2xl",
-              isEditMode && "p-8 border-2 border-dashed border-orange-500/30 rounded-3xl bg-orange-500/5 transition-all"
+              isEditMode && "p-8 border-2 border-dashed border-[#21F1A8]/30 rounded-3xl bg-[#21F1A8]/5 transition-all"
             )}
           >
             {data.logoUrl ? (
@@ -926,7 +926,7 @@ function PortfolioApp() {
               />
             ) : (
               isEditMode && (
-                <div className="py-12 flex flex-col items-center gap-4 text-orange-500/40">
+                <div className="py-12 flex flex-col items-center gap-4 text-[#21F1A8]/40">
                   <ImageIcon className="w-16 h-16" />
                   <p className="text-sm font-medium">로고 URL을 아래에 입력해주세요</p>
                 </div>
@@ -935,8 +935,8 @@ function PortfolioApp() {
             
             {isEditMode && (
               <div className="mt-6 w-full max-w-md flex flex-col items-center gap-3">
-                <div className="w-full glass px-4 py-3 rounded-2xl flex items-center gap-3 border border-white/10 focus-within:border-orange-500/50 transition-all shadow-xl">
-                  <Link2 className="w-4 h-4 text-orange-500" />
+                <div className="w-full glass px-4 py-3 rounded-2xl flex items-center gap-3 border border-white/10 focus-within:border-[#21F1A8]/50 transition-all shadow-xl">
+                  <Link2 className="w-4 h-4 text-[#21F1A8]" />
                   <input 
                     value={data.logoUrl || ''} 
                     onChange={(e) => updateField('logoUrl', e.target.value)}
@@ -954,7 +954,7 @@ function PortfolioApp() {
                   )}
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <p className="text-[10px] text-orange-500/80 font-bold uppercase tracking-widest">
+                  <p className="text-[10px] text-[#21F1A8]/80 font-bold uppercase tracking-widest">
                     * Paste Google Drive Link Above
                   </p>
                   <p className="text-[9px] text-white/40">
@@ -1025,7 +1025,7 @@ function PortfolioApp() {
           {isEditMode && (
             <button 
               onClick={() => addProject()}
-              className="p-2 glass rounded-full hover:bg-orange-500 transition-colors"
+              className="p-2 glass rounded-full hover:bg-[#21F1A8] transition-colors"
             >
               <Plus className="w-5 h-5" />
             </button>
@@ -1048,10 +1048,10 @@ function PortfolioApp() {
                   onClick={() => setExpandedGenre(expandedGenre === genre ? null : genre)}
                   className={cn(
                     "p-3 glass rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer text-center transition-all duration-500 glass-hover",
-                    expandedGenre === genre && "ring-1 ring-orange-500/30 bg-white/5"
+                    expandedGenre === genre && "ring-1 ring-[#21F1A8]/30 bg-white/5"
                   )}
                 >
-                  <h3 className="font-sans text-white/60 group-hover:text-orange-500 transition-colors uppercase tracking-tight font-medium" style={getTextStyle(`genre.${genre}`, 'h3')}>
+                  <h3 className="font-sans text-white/60 group-hover:text-[#21F1A8] transition-colors uppercase tracking-tight font-medium" style={getTextStyle(`genre.${genre}`, 'h3')}>
                     <EditableText 
                       value={genre} 
                       onChange={(v) => {
@@ -1070,7 +1070,7 @@ function PortfolioApp() {
                   </h3>
                   <motion.div
                     animate={{ rotate: expandedGenre === genre ? 180 : 0 }}
-                    className="w-8 h-8 rounded-full glass flex items-center justify-center text-orange-500"
+                    className="w-8 h-8 rounded-full glass flex items-center justify-center text-[#21F1A8]"
                   >
                     <ChevronRight className="w-4 h-4 rotate-90" />
                   </motion.div>
@@ -1108,12 +1108,12 @@ function PortfolioApp() {
                                 onClick={() => setExpandedYears(prev => ({ ...prev, [yearKey]: !prev[yearKey] }))}
                                 className="flex items-center justify-between py-2 px-4 glass rounded-xl cursor-pointer hover:bg-white/5 transition-colors border border-white/5"
                               >
-                                <span className="text-orange-500 font-mono text-[11px] tracking-widest opacity-80">{year}</span>
+                                <span className="text-[#21F1A8] font-mono text-[11px] tracking-widest opacity-80">{year}</span>
                                 <motion.div
                                   animate={{ rotate: isYearExpanded ? 180 : 0 }}
                                   transition={{ duration: 0.3 }}
                                 >
-                                  <ChevronDown className="w-4 h-4 text-orange-500/50" />
+                                  <ChevronDown className="w-4 h-4 text-[#21F1A8]/50" />
                                 </motion.div>
                               </div>
                               
@@ -1136,7 +1136,7 @@ function PortfolioApp() {
                                             <div 
                                               onClick={() => !isEditMode && setSelectedProjectId(project.id)}
                                               className={cn(
-                                                "p-4 glass rounded-2xl flex items-center justify-center relative cursor-pointer glass-hover transition-all hover:bg-orange-500/10 border-transparent hover:border-orange-500/30",
+                                                "p-4 glass rounded-2xl flex items-center justify-center relative cursor-pointer glass-hover transition-all hover:bg-[#21F1A8]/10 border-transparent hover:border-[#21F1A8]/30",
                                                 isEditMode && "cursor-default"
                                               )}
                                             >
@@ -1145,14 +1145,14 @@ function PortfolioApp() {
                                                   <div className="flex flex-col gap-0.5 md:gap-1">
                                                     <button 
                                                       onClick={(e) => { e.stopPropagation(); moveProject(project.id, 'up'); }}
-                                                      className="p-1 glass rounded hover:text-orange-500 transition-colors bg-white/5"
+                                                      className="p-1 glass rounded hover:text-[#21F1A8] transition-colors bg-white/5"
                                                       title="Move Up"
                                                     >
                                                       <ChevronUp className="w-2.5 h-2.5 md:w-3 md:h-3" />
                                                     </button>
                                                     <button 
                                                       onClick={(e) => { e.stopPropagation(); moveProject(project.id, 'down'); }}
-                                                      className="p-1 glass rounded hover:text-orange-500 transition-colors bg-white/5"
+                                                      className="p-1 glass rounded hover:text-[#21F1A8] transition-colors bg-white/5"
                                                       title="Move Down"
                                                     >
                                                       <ChevronDown className="w-2.5 h-2.5 md:w-3 md:h-3" />
@@ -1162,7 +1162,7 @@ function PortfolioApp() {
                                               )}
 
                                               <div className="flex flex-col items-center text-center gap-1">
-                                                <span className="text-orange-500 font-mono text-[10px] tracking-widest" style={getTextStyle(`projects.${project.id}.year`, 'accent')}>
+                                                <span className="text-[#21F1A8] font-mono text-[10px] tracking-widest" style={getTextStyle(`projects.${project.id}.year`, 'accent')}>
                                                   <EditableText 
                                                     value={project.year} 
                                                     onChange={(v) => updateProject(project.id, 'year', v)} 
@@ -1196,7 +1196,7 @@ function PortfolioApp() {
                                                 <div className="absolute right-1 md:right-4 flex items-center gap-1 md:gap-2">
                                                   <button 
                                                     onClick={() => setSelectedProjectId(project.id)}
-                                                    className="p-1 md:p-1.5 glass rounded-lg hover:bg-orange-500 transition-colors"
+                                                    className="p-1 md:p-1.5 glass rounded-lg hover:bg-[#21F1A8] transition-colors"
                                                     title="Edit Details"
                                                   >
                                                     <Maximize className="w-3 h-3" />
@@ -1228,7 +1228,7 @@ function PortfolioApp() {
                       {isEditMode && (
                         <div 
                           onClick={() => addProject(genre)}
-                          className="p-4 glass rounded-2xl flex items-center justify-center cursor-pointer glass-hover transition-all hover:bg-orange-500/10 border border-dashed border-white/20 hover:border-orange-500/50 text-white/40 hover:text-orange-500"
+                          className="p-4 glass rounded-2xl flex items-center justify-center cursor-pointer glass-hover transition-all hover:bg-[#21F1A8]/10 border border-dashed border-white/20 hover:border-[#21F1A8]/50 text-white/40 hover:text-[#21F1A8]"
                         >
                           <div className="flex items-center gap-2 text-sm font-medium">
                             <Plus className="w-4 h-4" /> Add Item to {genre}
@@ -1258,7 +1258,7 @@ function PortfolioApp() {
               viewport={{ once: true }}
               className={cn(
                 "relative group md:row-span-2",
-                isEditMode && "p-4 border border-dashed border-white/10 rounded-[40px] hover:border-orange-500/30 transition-colors"
+                isEditMode && "p-4 border border-dashed border-white/10 rounded-[40px] hover:border-[#21F1A8]/30 transition-colors"
               )}
               onDragOver={(e) => {
                 if (isEditMode) e.preventDefault();
@@ -1295,7 +1295,7 @@ function PortfolioApp() {
                   <button
                     onClick={enhanceImage}
                     disabled={isEnhancing}
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/50 text-white rounded-2xl text-xs font-medium transition-all"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-[#21F1A8] hover:bg-[#21F1A8] disabled:bg-[#21F1A8]/50 text-white rounded-2xl text-xs font-medium transition-all"
                   >
                     {isEnhancing ? (
                       <>
@@ -1314,7 +1314,7 @@ function PortfolioApp() {
             </motion.div>
 
             <div className="space-y-4">
-              <div className="text-orange-500 font-mono tracking-[0.2em] uppercase" style={getTextStyle('about.role', 'accent')}>
+              <div className="text-[#21F1A8] font-mono tracking-[0.2em] uppercase" style={getTextStyle('about.role', 'accent')}>
                 <EditableText 
                   value={data.about.role} 
                   onChange={(v) => updateField('about.role', v)} 
@@ -1404,7 +1404,7 @@ function PortfolioApp() {
 
             <div className="col-span-2 md:col-span-1 md:col-start-2 space-y-6 md:-mt-8">
               <div className="relative font-light leading-[1.8] opacity-70 max-w-xl pl-6 tracking-tight" style={getTextStyle('about.description', 'body')}>
-                <div className="absolute left-0 top-0 w-[2px] h-[80%] bg-orange-500" />
+                <div className="absolute left-0 top-0 w-[2px] h-[80%] bg-[#21F1A8]" />
                 <EditableText 
                   value={data.about.description} 
                   onChange={(v) => updateField('about.description', v)} 
@@ -1435,7 +1435,7 @@ function PortfolioApp() {
 
           <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 w-full max-w-4xl">
             <a href={`mailto:${data.contact.email}`} className="glass glass-hover p-4 md:p-8 rounded-2xl md:rounded-3xl flex flex-col items-center gap-2 md:gap-4 group">
-              <div className="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-[#21F1A8] transition-colors">
                 <Mail className="w-4 h-4 md:w-6 md:h-6" />
               </div>
               <div className="font-light opacity-60 text-xs md:text-base" style={getTextStyle('contact.email', 'body')}>
@@ -1451,7 +1451,7 @@ function PortfolioApp() {
               </div>
             </a>
             <a href={`https://instagram.com/${data.contact.instagram.replace('@', '')}`} target="_blank" className="glass glass-hover p-4 md:p-8 rounded-2xl md:rounded-3xl flex flex-col items-center gap-2 md:gap-4 group">
-              <div className="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-[#21F1A8] transition-colors">
                 <Instagram className="w-4 h-4 md:w-6 md:h-6" />
               </div>
               <div className="font-light opacity-60 text-xs md:text-base" style={getTextStyle('contact.instagram', 'body')}>
@@ -1467,7 +1467,7 @@ function PortfolioApp() {
               </div>
             </a>
             <a href={`tel:${data.contact.phone.replace(/\s/g, '')}`} className="glass glass-hover p-4 md:p-8 rounded-2xl md:rounded-3xl flex flex-col items-center gap-2 md:gap-4 group">
-              <div className="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-[#21F1A8] transition-colors">
                 <Phone className="w-4 h-4 md:w-6 md:h-6" />
               </div>
               <div className="font-light opacity-60 text-xs md:text-base" style={getTextStyle('contact.phone', 'body')}>
@@ -1555,7 +1555,7 @@ function PortfolioApp() {
             >
               <button 
                 aria-label="작품 편집 닫기" onClick={() => setSelectedProjectId(null)}
-                className="absolute top-6 right-6 z-20 p-3 glass rounded-full hover:bg-orange-500 transition-colors group"
+                className="absolute top-6 right-6 z-20 p-3 glass rounded-full hover:bg-[#21F1A8] transition-colors group"
               >
                 <X className="w-5 h-5 group-hover:scale-110 transition-transform" />
               </button>
@@ -1566,7 +1566,7 @@ function PortfolioApp() {
               )}>
                 {/* Modal Header */}
                 <div className="space-y-4">
-                  <div className="text-orange-500 font-mono text-xs tracking-[0.3em] uppercase opacity-60">
+                  <div className="text-[#21F1A8] font-mono text-xs tracking-[0.3em] uppercase opacity-60">
                     <EditableText 
                       value={selectedProject.genre} 
                       onChange={(v) => updateProject(selectedProject.id, 'genre', v)} 
@@ -1577,7 +1577,7 @@ function PortfolioApp() {
                       style={getTextStyle(`projects.${selectedProject.id}.genre`, 'accent')}
                     />
                   </div>
-                  <div className="text-orange-500 font-mono text-xs tracking-[0.3em] uppercase opacity-60">
+                  <div className="text-[#21F1A8] font-mono text-xs tracking-[0.3em] uppercase opacity-60">
                     <EditableText 
                       value={selectedProject.year} 
                       onChange={(v) => updateProject(selectedProject.id, 'year', v)} 
@@ -1604,7 +1604,7 @@ function PortfolioApp() {
                 {/* Meta Info */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 border-y border-white/5 py-12">
                   <div className="space-y-3">
-                    <h4 className="text-orange-500 font-mono text-[10px] tracking-widest uppercase opacity-40">담당 역할</h4>
+                    <h4 className="text-[#21F1A8] font-mono text-[10px] tracking-widest uppercase opacity-40">담당 역할</h4>
                     <div className="font-light opacity-80" style={getTextStyle(`projects.${selectedProject.id}.role`, 'h2')}>
                       <EditableText 
                         value={selectedProject.role} 
@@ -1618,7 +1618,7 @@ function PortfolioApp() {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <h4 className="text-orange-500 font-mono text-[10px] tracking-widest uppercase opacity-40">공연 장소</h4>
+                    <h4 className="text-[#21F1A8] font-mono text-[10px] tracking-widest uppercase opacity-40">공연 장소</h4>
                     <div className="font-light opacity-80" style={getTextStyle(`projects.${selectedProject.id}.location`, 'h2')}>
                       <EditableText 
                         value={selectedProject.location || ""} 
@@ -1635,9 +1635,9 @@ function PortfolioApp() {
 
                 {/* Bulk URL Input (New) */}
                 {isEditMode && (
-                  <div className="p-8 glass rounded-[32px] border border-orange-500/20 space-y-6">
+                  <div className="p-8 glass rounded-[32px] border border-[#21F1A8]/20 space-y-6">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-orange-500 font-mono text-[11px] uppercase tracking-[0.2em]">
+                      <div className="flex items-center gap-3 text-[#21F1A8] font-mono text-[11px] uppercase tracking-[0.2em]">
                         <LinkIcon className="w-4 h-4" />
                         사진 링크 여러 개 추가
                       </div>
@@ -1662,7 +1662,7 @@ function PortfolioApp() {
                           value={bulkUrls}
                           onChange={(e) => setBulkUrls(e.target.value)}
                           placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.png&#10;..."
-                          className="w-full h-40 bg-white/5 border border-white/10 rounded-2xl p-5 text-xs font-mono focus:outline-none focus:border-orange-500/50 custom-scrollbar placeholder:opacity-20"
+                          className="w-full h-40 bg-white/5 border border-white/10 rounded-2xl p-5 text-xs font-mono focus:outline-none focus:border-[#21F1A8]/50 custom-scrollbar placeholder:opacity-20"
                         />
                         <button 
                           onClick={() => {
@@ -1677,7 +1677,7 @@ function PortfolioApp() {
                             }
                           }}
                           disabled={!orderedPhotoLinks.length}
-                          className="disabled:opacity-40 w-full py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
+                          className="disabled:opacity-40 w-full py-4 bg-[#21F1A8] hover:bg-[#21F1A8] text-white rounded-2xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#21F1A8]/20"
                         >
                           <Check className="w-4 h-4" />
                           {orderedPhotoLinks.length}개 링크 순서대로 추가
@@ -1691,7 +1691,7 @@ function PortfolioApp() {
                 <div 
                   className={cn(
                     "space-y-8",
-                    isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-orange-500/30 transition-colors"
+                    isEditMode && "p-4 border border-dashed border-white/10 rounded-3xl hover:border-[#21F1A8]/30 transition-colors"
                   )}
                   onDragOver={(e) => {
                     if (isEditMode) e.preventDefault();
@@ -1753,7 +1753,7 @@ function PortfolioApp() {
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <h4 className="text-orange-500 font-mono text-xs tracking-widest uppercase opacity-60">공연 사진</h4>
+                    <h4 className="text-[#21F1A8] font-mono text-xs tracking-widest uppercase opacity-60">공연 사진</h4>
                     {isEditMode && (
                       <div className="flex items-center gap-4">
                         <span className="text-[10px] text-white/40 uppercase tracking-widest">사진을 여기에 놓아 주세요</span>
@@ -1762,7 +1762,7 @@ function PortfolioApp() {
                             const newImages = [...(selectedProject.images || []), ""];
                             updateProject(selectedProject.id, 'images', newImages);
                           }}
-                          className="p-2 glass rounded-full hover:bg-orange-500 transition-colors text-white/60 hover:text-white"
+                          className="p-2 glass rounded-full hover:bg-[#21F1A8] transition-colors text-white/60 hover:text-white"
                         >
                           <Plus className="w-4 h-4" />
                         </button>
@@ -1807,7 +1807,7 @@ function PortfolioApp() {
                                 newImages[idx] = formatImageUrl(e.target.value);
                                 updateProject(selectedProject.id, 'images', newImages);
                               }}
-                              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-orange-500/50"
+                              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-[#21F1A8]/50"
                               placeholder="Image URL"
                             />
                             <button 
@@ -1831,7 +1831,7 @@ function PortfolioApp() {
                         }}
                         className="aspect-video glass rounded-3xl flex flex-col items-center justify-center gap-4 hover:bg-white/5 border border-dashed border-white/10 group"
                       >
-                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#21F1A8] transition-colors">
                           <Plus className="w-6 h-6" />
                         </div>
                         <span className="text-xs font-mono tracking-widest uppercase opacity-40">사진 추가</span>
@@ -1857,7 +1857,7 @@ function PortfolioApp() {
             <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setSelectedImage(null)} />
             <button 
               onClick={() => setSelectedImage(null)}
-              className="absolute top-6 right-6 z-20 p-3 glass rounded-full hover:bg-orange-500 transition-colors group"
+              className="absolute top-6 right-6 z-20 p-3 glass rounded-full hover:bg-[#21F1A8] transition-colors group"
             >
               <X className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </button>
