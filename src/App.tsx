@@ -4,9 +4,6 @@ import './editor-theme.css';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Move, 
-  Music, 
-  Theater, 
   Mail, 
   Instagram, 
   Phone, 
@@ -17,24 +14,17 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
-  Lightbulb,
-  ArrowLeft,
   Image as ImageIcon,
-  Type,
   Maximize,
   X,
   Sparkles,
   Loader2,
   Download,
   Upload,
-  LogIn,
-  LogOut,
   AlertCircle,
   RefreshCw,
   Link as LinkIcon,
   Link2,
-  Pencil,
-  Eraser
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { cn } from './lib/utils';
@@ -267,10 +257,8 @@ function PortfolioApp() {
   const [isEditMode, setIsEditMode] = useState(() => {
     return localStorage.getItem('portfolio_draft') !== null;
   });
-  const isEditModeRef = useRef(isEditMode);
 
   useEffect(() => {
-    isEditModeRef.current = isEditMode;
     if (isEditMode) {
       try {
         localStorage.setItem('portfolio_draft', JSON.stringify(data));
