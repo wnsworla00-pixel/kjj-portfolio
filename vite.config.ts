@@ -25,7 +25,7 @@ export default defineConfig(({mode}) => {
             const data=JSON.parse(body);
             if(!Array.isArray(data.projects)||!data.about||!data.intro||!data.fonts)throw new Error('Invalid portfolio');
             const target=path.resolve(__dirname,'src/portfolio.json');
-            const content=JSON.stringify({...data,contentSource:'project'},null,2);
+            const content=JSON.stringify({...data,contentSource:'project'},null,2)+'\n';
             await writeFile(target+'.tmp',content,'utf8');
             await rename(target+'.tmp',target);
             saved=true;
