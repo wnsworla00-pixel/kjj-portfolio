@@ -577,6 +577,15 @@
   },
   "projects": [
     {
+      "id": "1791274656846",
+      "title": "돌쇠전",
+      "genre": "Musical",
+      "role": "Lighting Programmer",
+      "location": "정동극장세실",
+      "year": "2026",
+      "images": []
+    },
+    {
       "images": [
         "https://lh3.googleusercontent.com/d/1F4uR0qm8uKXR0d3sZ-paboLBk97IJiTD",
         "https://lh3.googleusercontent.com/d/1fmUU5el8x8SeVE1e6MkmbMGLp4eJTKoD",
@@ -992,7 +1001,7 @@
     },
     {
       "role": "Lighting Designer",
-      "genre": "Other",
+      "genre": "Theatre",
       "id": "1774953062803",
       "title": "[인형극] 아롤을 깨물었을 때",
       "year": "2025",
