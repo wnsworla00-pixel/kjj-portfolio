@@ -578,7 +578,18 @@
   "projects": [
     {
       "images": [
-        "https://lh3.googleusercontent.com/d/1fmUU5el8x8SeVE1e6MkmbMGLp4eJTKoD"
+        "https://lh3.googleusercontent.com/d/1F4uR0qm8uKXR0d3sZ-paboLBk97IJiTD",
+        "https://lh3.googleusercontent.com/d/1fmUU5el8x8SeVE1e6MkmbMGLp4eJTKoD",
+        "https://lh3.googleusercontent.com/d/15dH-tLc9wgaJz1SuVeRLwBthbbj4YxlU",
+        "https://lh3.googleusercontent.com/d/18mk3XT1qDo7elxFaOx1zWVPSUyFaYvot",
+        "https://lh3.googleusercontent.com/d/1J98ju48G1SgsckrLm_VMrLW-QahotYYz",
+        "https://lh3.googleusercontent.com/d/1Qatcz59kX5aL9D4-rhl3TscnF3--Fyt3",
+        "https://lh3.googleusercontent.com/d/1eAx325xDp0lLf1Z8Sjquy5nJB2gZUa4c",
+        "https://lh3.googleusercontent.com/d/1gVqkUB-5dbZcrj4O7yGMKYHA5FagPvqb",
+        "https://lh3.googleusercontent.com/d/1iUvAfxmvxOA5rWFPoLpCek40wgNSpX3u",
+        "https://lh3.googleusercontent.com/d/1lQMzDldON5DdwGyJqsBIjl7f_uAuecpm",
+        "https://lh3.googleusercontent.com/d/1otGIbMsSIO2qcr78X0ntyFAGTs9Jr97g",
+        "https://lh3.googleusercontent.com/d/1yxUbZYjnqX6dsZbgdmawlEP5yAQh7dSH"
       ],
       "role": "Lighting Designer",
       "genre": "Dance",
@@ -600,7 +611,14 @@
       "role": "Lighting Designer",
       "title": "버지니아 사건파일",
       "id": "1788925569476",
-      "images": [],
+      "images": [
+        "https://lh3.googleusercontent.com/d/1kIQTIioid767GU5RvZ3_LPwynmFiqSF6",
+        "https://lh3.googleusercontent.com/d/1-xZVvSt5D8Se_8sJQCj7fJ_1kcFdP7HK",
+        "https://lh3.googleusercontent.com/d/1EKupq-txRlURlGvqa3FpMh5yCSZ9AZE-",
+        "https://lh3.googleusercontent.com/d/1JwjlxyaUtc2cT4zwtaGxrO4o27s4rSQp",
+        "https://lh3.googleusercontent.com/d/1ioFJYcq9fFQvWkC7pbzWCCnYw6kG-qwO",
+        "https://lh3.googleusercontent.com/d/1p0U_BbsP8qEnqT4JkvnMyoQ5WyzM8oMs"
+      ],
       "year": "2026",
       "genre": "Theatre",
       "location": "하남문화예술회관 아랑홀"
@@ -610,7 +628,14 @@
       "id": "1788925515034",
       "role": "Lighting Designer",
       "location": "서일문화예술고등학교 강당",
-      "images": [],
+      "images": [
+        "https://lh3.googleusercontent.com/d/1_o0frSpK5W-XCIw54scXrOoPfU17PUhI",
+        "https://lh3.googleusercontent.com/d/18zlp4WjhpKhElf-kJSFnrbjk2MomEX_9",
+        "https://lh3.googleusercontent.com/d/1ay_dwlXUozDx7csIB5xeDM50y1sTvBsP",
+        "https://lh3.googleusercontent.com/d/1eP-WsFZfG_A-0znDiSFNlaNdIxc41jVo",
+        "https://lh3.googleusercontent.com/d/1pNCaDcaEWbzvM1zyvhI6HqBKSsMnDy-D",
+        "https://lh3.googleusercontent.com/d/1tjB2lC9x8-bfj9nOmI1svOHpNm7BZ_bl"
+      ],
       "year": "2026",
       "genre": "Musical"
     },
@@ -695,9 +720,9 @@
       "location": "천안예술의전당 소극장",
       "title": "독립군가",
       "images": [
+        "https://lh3.googleusercontent.com/d/1DEnTRwUC_Gf69AF0qeew2wZzPZ-j3Kb7",
         "https://lh3.googleusercontent.com/d/13-61ig52PlFHZUSZHmnZnwNy1DvlHthz",
         "https://lh3.googleusercontent.com/d/1BtkKyPJfvHJFQAbrN7J7Gn3aZc-trbrG",
-        "https://lh3.googleusercontent.com/d/1DEnTRwUC_Gf69AF0qeew2wZzPZ-j3Kb7",
         "https://lh3.googleusercontent.com/d/1Diy4tsynaSBf43TYRuAeq5ixYfiZizje",
         "https://lh3.googleusercontent.com/d/1EEb6K9Xcgf44pEubsQlPHHtz_YIwwPoo",
         "https://lh3.googleusercontent.com/d/1IuTEKjxgxFXvPXfuHlkcW_yn7JaJp-rk",
@@ -867,8 +892,8 @@
       "genre": "Theatre",
       "year": "2025",
       "images": [
-        "https://lh3.googleusercontent.com/d/1RY0Ww8DDKiE8gPK5t-wu_D98Y19Oeyiv",
         "https://lh3.googleusercontent.com/d/1gcNnsgq6FxjDRdSJnlTv5pUWN6OD8_H2",
+        "https://lh3.googleusercontent.com/d/1RY0Ww8DDKiE8gPK5t-wu_D98Y19Oeyiv",
         "https://lh3.googleusercontent.com/d/1z09kPfyl9p54NcOJ5K1TFCJcv62EWTXs"
       ],
       "title": "클로저",
@@ -901,11 +926,11 @@
       "title": "헤어스프레이 [서울문화고] ",
       "id": "1774953642201",
       "images": [
+        "https://lh3.googleusercontent.com/d/1RPSwlRD9sCzU0Lr9oUY9o4HTqtGxDk7D",
         "https://lh3.googleusercontent.com/d/10boA1JJJv2Y1zTnkqda7wGVq4_Ab14ci",
         "https://lh3.googleusercontent.com/d/1A1-mCln63jLF2q02L7ZyfoQvGqUBHjOZ",
         "https://lh3.googleusercontent.com/d/1KwLPvI_1SXsNs9Y7waX8x3AFEft6lAh1",
         "https://lh3.googleusercontent.com/d/1Nu2kvp86lboMGzWPOIZecDgZIG6YzKU-",
-        "https://lh3.googleusercontent.com/d/1RPSwlRD9sCzU0Lr9oUY9o4HTqtGxDk7D",
         "https://lh3.googleusercontent.com/d/1bQOEf5eWXz9EBcYL0xiZUoy30RTiB7Uv",
         "https://lh3.googleusercontent.com/d/1lNdW00BLAlV8ggXwyqCndkMwl5qKifqS",
         "https://lh3.googleusercontent.com/d/1u-b59vS-412DGBCzi8_Xodu1TgKE0ovA",
@@ -954,9 +979,9 @@
       "title": "맘마미아 [서일문화예술고]",
       "year": "2024",
       "images": [
+        "https://lh3.googleusercontent.com/d/17M7oWeRziAPWDs35ERAgVwsV_2N3XGU7",
         "https://lh3.googleusercontent.com/d/1-PMdRiZ9-zSZo9xMH4--uZ7N-aU0xP8Y",
         "https://lh3.googleusercontent.com/d/15tvxDgaf9GvziNYnGItI4HsuWO6GbB8u",
-        "https://lh3.googleusercontent.com/d/17M7oWeRziAPWDs35ERAgVwsV_2N3XGU7",
         "https://lh3.googleusercontent.com/d/1IB_sSNKmNLAgn6iDiUd3exy6U43xo345",
         "https://lh3.googleusercontent.com/d/1fXpTm_NH7cHUkpyny5bpuBBj0JKE9jrB",
         "https://lh3.googleusercontent.com/d/1g3ozPpyRJ925mW5N6KHxZeSpUhZvZHaK",
@@ -973,6 +998,7 @@
       "year": "2025",
       "location": "몽골국립인형극장",
       "images": [
+        "https://lh3.googleusercontent.com/d/1u61hSPTD-peEeLq8ruG8_wEDynO328BN",
         "https://lh3.googleusercontent.com/d/1-v60WX2upCTu4WId2MjeCT5_WKeb2ORc",
         "https://lh3.googleusercontent.com/d/14hoPkxjF8ksL6mwoELW3F37fP04xUtJL",
         "https://lh3.googleusercontent.com/d/14iGIs1BVQZfGaFH0TLAMKTIN8iEwv8kC",
@@ -982,8 +1008,7 @@
         "https://lh3.googleusercontent.com/d/1Gbq8m1l_aP1XGq5lvzp8azTq46SMEFHa",
         "https://lh3.googleusercontent.com/d/1fYxF3ZNUctZeIfTiB2mH9pMeuqXHS7Te",
         "https://lh3.googleusercontent.com/d/1hYs3GlmAz4cC9qOA1wt2PCzgEtQVx3oN",
-        "https://lh3.googleusercontent.com/d/1kipiUhZKyQD-Z337FKxdNqcSf_NRcsnO",
-        "https://lh3.googleusercontent.com/d/1u61hSPTD-peEeLq8ruG8_wEDynO328BN"
+        "https://lh3.googleusercontent.com/d/1kipiUhZKyQD-Z337FKxdNqcSf_NRcsnO"
       ]
     },
     {
@@ -1061,6 +1086,7 @@
       "genre": "Musical",
       "id": "1774952736140",
       "images": [
+        "https://lh3.googleusercontent.com/d/1p--cs2bT8UpsHHnU3PqXDd2_-91s_LQC",
         "https://lh3.googleusercontent.com/d/14oaxQtFS3iDxNJIyhM9OtrsW1Denc5VL",
         "https://lh3.googleusercontent.com/d/1GbN14JYAu5Fp_XZPviqBgngVbRQhEgZT",
         "https://lh3.googleusercontent.com/d/1KB5xO0SGnsnWg-IrNJcQ_6cQ37ziFgGk",
@@ -1069,7 +1095,6 @@
         "https://lh3.googleusercontent.com/d/1fHipk2pnohsOywjNUyXf8PQNkqYlGAQL",
         "https://lh3.googleusercontent.com/d/1i7mp1mxkkWKgkZH52oMGISRCdNQOpQ-0",
         "https://lh3.googleusercontent.com/d/1jPS8E3f9wWIiX240betQUnkogXgLVk-B",
-        "https://lh3.googleusercontent.com/d/1p--cs2bT8UpsHHnU3PqXDd2_-91s_LQC",
         "https://lh3.googleusercontent.com/d/1v_Rr3XU3aF6Qx92hCyau3bTMx6Lfn1M3",
         "https://lh3.googleusercontent.com/d/1wWk154S2xkKMCb4maOHRb3khRUq5nU_G"
       ],
@@ -1081,11 +1106,11 @@
       "year": "2024",
       "location": "방송고등학교 소극장",
       "images": [
+        "https://lh3.googleusercontent.com/d/1LfUdH4iFF27X7xOZYP7KOufHwywTNop-",
+        "https://lh3.googleusercontent.com/d/1BumiKnQqxF_KTIaMT23hXrLgBrgleRKy",
         "https://lh3.googleusercontent.com/d/1-IptK60jV9RJLiTf7wwUjPt-jJcgYhTj",
         "https://lh3.googleusercontent.com/d/12COPneSi0wMnsHn7Yw9aewZiC2G07Ep4",
         "https://lh3.googleusercontent.com/d/15Q6Io4X_MFNuPQ8Ytn-eyT9OwUtzj12F",
-        "https://lh3.googleusercontent.com/d/1BumiKnQqxF_KTIaMT23hXrLgBrgleRKy",
-        "https://lh3.googleusercontent.com/d/1LfUdH4iFF27X7xOZYP7KOufHwywTNop-",
         "https://lh3.googleusercontent.com/d/1Oe9e8r95pTDVCuem7YyJp7qdr8rDK_qO",
         "https://lh3.googleusercontent.com/d/1TNbifKmbOoWcsVKi07VceHxzvwHdEPEp",
         "https://lh3.googleusercontent.com/d/1Ukt42zHIHQZJ3hLvWEhGQ5kGNEtaeHaB",
@@ -1136,9 +1161,9 @@
       "genre": "Musical",
       "year": "2024",
       "images": [
+        "https://lh3.googleusercontent.com/d/1M2smC3GC-hvVphgK8r39kNTLfwc0FqLb",
         "https://lh3.googleusercontent.com/d/13_wB2nN2DJzutlt_GwbjlsWrJHKsSU9o",
         "https://lh3.googleusercontent.com/d/17Jx-cGgsAgDXi-yZbhf7y32M7byv0dvl",
-        "https://lh3.googleusercontent.com/d/1M2smC3GC-hvVphgK8r39kNTLfwc0FqLb",
         "https://lh3.googleusercontent.com/d/1Sv6gwxVzi-L_tnLx0PBekqmSf9DYYU-2",
         "https://lh3.googleusercontent.com/d/1Xz7gYkor0bntR62hp9dusIAIcOf6EvsM"
       ],
@@ -1198,11 +1223,11 @@
       "title": "[한국무용] M.A.P",
       "role": "Lighting Designer",
       "images": [
+        "https://lh3.googleusercontent.com/d/1wsx9npLBsYRDCYUAEYB8v_fWX_mtiXPW",
         "https://lh3.googleusercontent.com/d/109A0Bn5tLJQuogmZisf0EAsDEgIgTNKA",
         "https://lh3.googleusercontent.com/d/1F98clSsMNN1vFsfyb2CBwsTYGPo7qW7j",
         "https://lh3.googleusercontent.com/d/1jxgdZzoS1p-g7wzTfVUIAgZ17whTXfQT",
-        "https://lh3.googleusercontent.com/d/1uyszxQSZpi_dxsytmXBaw0KmhX4rXGkF",
-        "https://lh3.googleusercontent.com/d/1wsx9npLBsYRDCYUAEYB8v_fWX_mtiXPW"
+        "https://lh3.googleusercontent.com/d/1uyszxQSZpi_dxsytmXBaw0KmhX4rXGkF"
       ],
       "id": "1774902944570",
       "year": "2023",
@@ -1215,9 +1240,9 @@
       "role": "Lighting Designer",
       "id": "1774902934038",
       "images": [
+        "https://lh3.googleusercontent.com/d/1XFJO-BnIqc_SZ70IRTG-uX9mbPtHHtm7",
         "https://lh3.googleusercontent.com/d/16xq3bMtpcPa5h_z5tFFV8zR4VGSfT8FK",
         "https://lh3.googleusercontent.com/d/1DehBiw4VBfXYzgOdXm_sHGMf9v55qs1V",
-        "https://lh3.googleusercontent.com/d/1XFJO-BnIqc_SZ70IRTG-uX9mbPtHHtm7",
         "https://lh3.googleusercontent.com/d/1czC-oc9lk3nRfTkgRtoFak-EYvtYJ5jm"
       ],
       "genre": "Dance",
@@ -1228,12 +1253,12 @@
       "year": "2024",
       "id": "1774902054194",
       "images": [
+        "https://lh3.googleusercontent.com/d/1LL_alnacuXfHh84fyrmEkWw0Brya0D11",
         "https://lh3.googleusercontent.com/d/10s_7m3MQOMxmhjeTAzdNDbIILoNVvJgh",
         "https://lh3.googleusercontent.com/d/11Z2KE4X2tP01L1AO2lsRXWj3PszZkTib",
         "https://lh3.googleusercontent.com/d/12eUqtHaGxttaSHhA96pNfdkReXN8JHr1",
         "https://lh3.googleusercontent.com/d/14ZSS2ygfG0W942GkFD65NHmxRBRcXK-H",
         "https://lh3.googleusercontent.com/d/1HylJ03tDwi9IycOS1lBrLw2D7ztHcXpk",
-        "https://lh3.googleusercontent.com/d/1LL_alnacuXfHh84fyrmEkWw0Brya0D11",
         "https://lh3.googleusercontent.com/d/1LZ9jt5WPUm1UpVWTZ3uNtRP5C4h2Xcgi",
         "https://lh3.googleusercontent.com/d/1RPJPi1Rr7vqDwBng3VyfxkU8W249HKxw",
         "https://lh3.googleusercontent.com/d/1Wj7GgreLplr4sqa5yEilPkKd07K8fM6A",
@@ -1380,9 +1405,9 @@
       "id": "1774899703116",
       "location": "씨어터 조이",
       "images": [
+        "https://lh3.googleusercontent.com/d/1dcxyiwuXuaYaaX36-zWoiHtK-BL2xo8W",
         "https://lh3.googleusercontent.com/d/10OtJHKYZRPN7xj4V5LBbmdy3pXLxDGsI",
-        "https://lh3.googleusercontent.com/d/1clJ4K5vmgJbYhw-8_kqM4rlgQWHHfTSz",
-        "https://lh3.googleusercontent.com/d/1dcxyiwuXuaYaaX36-zWoiHtK-BL2xo8W"
+        "https://lh3.googleusercontent.com/d/1clJ4K5vmgJbYhw-8_kqM4rlgQWHHfTSz"
       ],
       "year": "2023",
       "title": "목마른 야채",
@@ -1477,11 +1502,11 @@
       "location": "관악아트홀",
       "genre": "Dance",
       "images": [
+        "https://lh3.googleusercontent.com/d/1PaePvYTzcDassGHl3rJPYbNXww6BzDyK",
         "https://lh3.googleusercontent.com/d/181oPybYcgeaI08e_43efWD40zibkk2WA",
         "https://lh3.googleusercontent.com/d/1CLxXYSYDrB_sqUQCnxXosgQRRzbTkdzk",
         "https://lh3.googleusercontent.com/d/1DFuSWiRIq_Zvfy5UZBMIFRGpMgB0odss",
         "https://lh3.googleusercontent.com/d/1PCBykETEStc30M2RaA1x3jA2Tnen0A2L",
-        "https://lh3.googleusercontent.com/d/1PaePvYTzcDassGHl3rJPYbNXww6BzDyK",
         "https://lh3.googleusercontent.com/d/1SXagxSyVnjW8k2s1ac8p9j1AyroKUOdQ",
         "https://lh3.googleusercontent.com/d/1bjrIsiieBaqlThf_qAX0EhriJbi4l4eA",
         "https://lh3.googleusercontent.com/d/1uif3DSw1_CDQCmXcqHm_qcQbHgZgrGzK"

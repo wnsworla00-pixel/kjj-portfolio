@@ -290,9 +290,10 @@ function PortfolioApp() {
     setIsSaving(true);
     try {
       const response=await fetch('/__editor/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-      if(!response.ok) throw new Error('저장 실패');
+      const result=await response.json();
+      if(!result.saved) throw new Error('저장 실패');
       setIsEditMode(false);setBackupData(null);
-      alert('프로젝트에 저장했습니다. 공개 사이트 반영은 ChatGPT에 요청해 주세요.');
+      alert(result.published?(result.unchanged?'저장했습니다. 공개 사이트와 같은 내용입니다.':'저장했습니다. 공개 사이트 자동 업데이트를 시작했습니다. 반영까지 잠시 걸립니다.'):'프로젝트에는 저장했습니다. 공개 사이트 자동 업데이트에 실패했습니다. GitHub 게시 연결을 확인한 뒤 다시 저장해 주세요.');
     } catch(error){alert('프로젝트에 저장하지 못했습니다. 수정 내용은 임시로 보관했습니다.');}
     finally{setIsSaving(false);}
   };
