@@ -40,3 +40,4 @@ html:has(body.spring-theme),body.spring-theme,.portfolio-view.spring-theme,.spri
 
 /* Text-only performances: inset genre, then position and title. */
 .record-project{grid-template-columns:minmax(110px,18%) 90px minmax(0,1fr);gap:22px}.record-genre{text-align:center}.record-role{font-size:11px;color:var(--amber);text-align:center;line-height:1.6}.record-copy>span{color:var(--muted)}@media(max-width:600px){.record-project{grid-template-columns:64px 62px minmax(0,1fr);gap:10px;padding:18px 0}.record-genre,.record-role{font-size:10px}.record-copy strong{font-size:13px}.record-copy>span{font-size:10px}}
+.record-genre{justify-self:end}@media(max-width:600px){.record-genre{justify-self:center}}
