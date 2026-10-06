@@ -58,3 +58,6 @@ html:has(body.spring-theme),body.spring-theme,.portfolio-view.spring-theme,.spri
 
 /* One portrait business-card frame around the complete designer introduction. */
 .about.section{padding-bottom:88px}.about.section::after{content:"";position:absolute;top:100px;bottom:42px;left:50%;transform:translateX(-50%);width:min(360px,calc(100% - 40px));border:1pt solid #747474;pointer-events:none;z-index:0}.business-card-background{border:0;background-color:transparent;mix-blend-mode:screen;opacity:.40}.business-card-background::after{display:none}.about>.about-description{max-width:300px;line-height:1.9}.about .about-copy{max-width:300px}.business-card-download{gap:8px;margin-top:36px}.business-card-download>a{font-size:10px;padding:9px 10px}@media(max-width:600px){.about.section{padding-bottom:78px}.about.section::after{top:88px;bottom:32px;width:min(340px,calc(100% - 36px))}.about>.about-description{max-width:270px}.business-card-download{margin-top:30px;gap:7px}.business-card-download>a{font-size:10px;padding:8px 9px}}
+
+/* Extend the portrait frame above the existing About heading without moving content. */
+.about.section::after{top:12px;width:min(392px,calc(100% - 40px))}@media(max-width:600px){.about.section::after{top:8px;width:min(360px,calc(100% - 28px))}}
