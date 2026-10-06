@@ -43,3 +43,5 @@ html:has(body.spring-theme),body.spring-theme,.portfolio-view.spring-theme,.spri
 .record-genre{justify-self:end}@media(max-width:600px){.record-genre{justify-self:center}}
 
 .record-genre,.record-role{align-self:center;display:flex;align-items:center;justify-content:center;line-height:1.6;min-height:20px;margin:0;padding-block:0}
+
+.filters button{display:flex;flex-direction:column;align-items:flex-start;gap:7px}.filter-english{font-size:10px;letter-spacing:.5px;color:var(--muted)}.filters button.active .filter-english{color:#21F1A8}.portfolio-view img{-webkit-user-drag:none;-webkit-touch-callout:none;user-select:none}@media(max-width:600px){.filters{gap:16px}.filter-english{font-size:9px}.filters button{font-size:12px}}

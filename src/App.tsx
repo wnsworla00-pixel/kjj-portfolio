@@ -286,6 +286,12 @@ function PortfolioApp() {
     }
   }, [isEditMode, data.projects]);
 
+  useEffect(()=>{
+    const protectImage=(event:MouseEvent|DragEvent)=>{if(event.target instanceof HTMLImageElement)event.preventDefault();};
+    document.addEventListener('contextmenu',protectImage);document.addEventListener('dragstart',protectImage);
+    return()=>{document.removeEventListener('contextmenu',protectImage);document.removeEventListener('dragstart',protectImage);};
+  },[]);
+
   const saveProject = async () => {
     setIsSaving(true);
     try {
@@ -1567,28 +1573,13 @@ function PortfolioApp() {
               )}>
                 {/* Modal Header */}
                 <div className="space-y-4">
-                  <div className="text-[#21F1A8] font-mono text-xs tracking-[0.3em] uppercase opacity-60">
-                    <EditableText 
-                      value={selectedProject.genre} 
-                      onChange={(v) => updateProject(selectedProject.id, 'genre', v)} 
-                      isEditMode={isEditMode}
-                      path={`projects.${selectedProject.id}.genre`}
-                      selectedPath={selectedPath}
-                      onSelect={setSelectedPath}
-                      style={getTextStyle(`projects.${selectedProject.id}.genre`, 'accent')}
-                    />
-                  </div>
-                  <div className="text-[#21F1A8] font-mono text-xs tracking-[0.3em] uppercase opacity-60">
-                    <EditableText 
-                      value={selectedProject.year} 
-                      onChange={(v) => updateProject(selectedProject.id, 'year', v)} 
-                      isEditMode={isEditMode}
-                      path={`projects.${selectedProject.id}.year`}
-                      selectedPath={selectedPath}
-                      onSelect={setSelectedPath}
-                      style={getTextStyle(`projects.${selectedProject.id}.year`, 'accent')}
-                    />
-                  </div>
+                  {isEditMode ? <div className="project-classification">
+                    <label>장르<select aria-label="공연 장르" value={['Theatre','Musical','Dance','Other'].find(g=>g.toLowerCase()===selectedProject.genre.toLowerCase())||'Other'} onChange={e=>updateProject(selectedProject.id,'genre',e.target.value)}>
+                      <option value="Theatre">연극 · Theatre</option><option value="Musical">뮤지컬 · Musicals</option><option value="Dance">무용 · Dance</option><option value="Other">콘서트 및 음악 · Concerts &amp; Music</option>
+                    </select></label>
+                    <label>연도<input aria-label="공연 연도" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} value={selectedProject.year} onChange={e=>updateProject(selectedProject.id,'year',e.target.value.replace(/[^0-9]/g,''))}/></label>
+                    <p>장르와 연도를 바꾸면 해당 목록으로 이동합니다. 변경 후 저장을 눌러주세요.</p>
+                  </div> : <div className="text-[#21F1A8] text-xs">{selectedProject.genre} · {selectedProject.year}</div>}
                   <h2 className="font-sans font-medium tracking-tight" style={getTextStyle(`projects.${selectedProject.id}.title`, 'h3')}>
                     <EditableText 
                       value={selectedProject.title} 
