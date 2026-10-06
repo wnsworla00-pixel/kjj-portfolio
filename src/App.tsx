@@ -611,17 +611,18 @@ function PortfolioApp() {
     }
   };
 
-  const addProject = (genre?: string) => {
+  const addProject = (genre?: string, year?: string) => {
     const newProject: Project = {
       id: Date.now().toString(),
-      title: "New Project Title",
-      genre: genre || "Genre",
+      title: "새 공연",
+      genre: genre || "Theatre",
       role: "Lighting Designer",
-      location: "Location",
-      year: "2020",
+      location: "",
+      year: year || String(new Date().getFullYear()),
       images: []
     };
     setData(prev => ({ ...prev, projects: [newProject, ...prev.projects] }));
+    setSelectedProjectId(newProject.id);
     // Also update display projects if adding
     setDisplayProjects(prev => [newProject, ...prev]);
   };
@@ -905,7 +906,7 @@ function PortfolioApp() {
       </div>
 
       <div className="editor-preview">
-        <PublicPortfolio editor={{data,active:isEditMode,select:setSelectedProjectId,text:(path,value)=><EditableText value={value} multiline={path.endsWith("description")} style={data.textStyles?.[path] ? {fontSize:data.textStyles[path].size,color:data.textStyles[path].color,opacity:data.textStyles[path].opacity} : {}} onChange={v=>updateField(path,v)} isEditMode={isEditMode} path={path} selectedPath={selectedPath} onSelect={setSelectedPath}/>}}/>
+        <PublicPortfolio editor={{data,active:isEditMode,select:setSelectedProjectId,add:addProject,text:(path,value)=><EditableText value={value} multiline={path.endsWith("description")} style={data.textStyles?.[path] ? {fontSize:data.textStyles[path].size,color:data.textStyles[path].color,opacity:data.textStyles[path].opacity} : {}} onChange={v=>updateField(path,v)} isEditMode={isEditMode} path={path} selectedPath={selectedPath} onSelect={setSelectedPath}/>}}/>
       </div>
       <details className="legacy-fields"><summary>이미지 · 세부 설정</summary>
       {/* Hero Section */}
