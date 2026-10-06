@@ -247,7 +247,7 @@ function PortfolioApp() {
   const [data, setData] = useState<PortfolioData>(() => {
     try {
       const draft = localStorage.getItem('portfolio_draft');
-      if (draft) {const parsed=JSON.parse(draft);parsed.about={...INITIAL_DATA.about,...parsed.about,businessCardBackground:parsed.about?.businessCardBackground||INITIAL_DATA.about.businessCardBackground,businessCardPdf:parsed.about?.businessCardPdf||INITIAL_DATA.about.businessCardPdf};for(const style of Object.values(parsed.textStyles||{}) as {color:string}[]){if(/^#(?:f97316|b75e15|ea875d|eb6c05)$/i.test(style.color))style.color="#21F1A8";}if(parsed.style)parsed.style.accentColor="#21F1A8";return parsed;}
+      if (draft) {const parsed=JSON.parse(draft);parsed.about={...INITIAL_DATA.about,...parsed.about,businessCardBackground:(!parsed.about?.businessCardBackground||parsed.about.businessCardBackground==='/business-card-background.png')?INITIAL_DATA.about.businessCardBackground:parsed.about.businessCardBackground,businessCardPdf:parsed.about?.businessCardPdf||INITIAL_DATA.about.businessCardPdf};for(const style of Object.values(parsed.textStyles||{}) as {color:string}[]){if(/^#(?:f97316|b75e15|ea875d|eb6c05)$/i.test(style.color))style.color="#21F1A8";}if(parsed.style)parsed.style.accentColor="#21F1A8";return parsed;}
     } catch (e) {
       console.error("Failed to load draft", e);
     }
