@@ -7,7 +7,7 @@ type Project={id:string;title:string;year:string;genre:string;location?:string;r
 type Portfolio=typeof initial & {about:typeof initial.about & {businessCardBackground?:string;businessCardPdf?:string}};
 const genres=[['All','전체'],['Theatre','연극'],['Musical','뮤지컬'],['Dance','무용'],['Other','그 외']];
 const genreLabel=(genre:string)=>genres.find(([g])=>g.toLowerCase()===genre.toLowerCase())?.[1]||'그 외';
-const roleLabel=(role:string)=>/programmer/i.test(role)?'프로그래머':/designer/i.test(role)?'디자이너':role==='Role'||!role.trim()?'포지션 미정':role;
+const roleLabel=(role:string)=>/programmer/i.test(role)?'Programmer':/designer/i.test(role)?'Designer':role==='Role'||!role.trim()?'포지션 미정':role;
 const matchesGenre=(project:Project,genre:string)=>genre==='All'||(genre==='Other'?!['theatre','musical','dance'].includes(project.genre.toLowerCase()):project.genre.toLowerCase()===genre.toLowerCase());
 function photoUrl(url:string){const match=url.match(/drive\.google\.com\/(?:file\/d\/([^/?]+)|(?:open|uc)\?[^#]*?id=([^&#]+))/);return match?`https://lh3.googleusercontent.com/d/${match[1]||match[2]}`:url;}
 function Picture({src,alt}:{src?:string;alt:string}){const [broken,setBroken]=useState(false);useEffect(()=>setBroken(false),[src]);return src&&!broken?<img src={photoUrl(src)} alt={alt} loading="lazy" referrerPolicy="no-referrer" onError={()=>setBroken(true)}/>:<div className="no-photo"><span>不汗黨</span><small>{src?'사진을 불러올 수 없습니다':'공연 이력'}</small></div>;}
