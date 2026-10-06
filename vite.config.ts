@@ -1,6 +1,8 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import {existsSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {writeFile,rename} from 'node:fs/promises';
 import {defineConfig, loadEnv} from 'vite';
 import {publishPortfolio} from './editor-publish';
@@ -24,6 +26,7 @@ export default defineConfig(({mode}) => {
             let body='';for await(const chunk of req){body+=chunk;if(Buffer.byteLength(body)>5_000_000)throw new Error('Too large');}
             const data=JSON.parse(body);
             if(!Array.isArray(data.projects)||!data.about||!data.intro||!data.fonts)throw new Error('Invalid portfolio');
+            for(const project of data.projects){if(!Array.isArray(project.images))continue;project.images=project.images.map((src:unknown)=>{if(typeof src!=='string')return src;const match=src.match(/^data:image\/webp;base64,(.*)$/s);if(!match)return src;const name='performance-'+createHash('sha256').update(Buffer.from(match[1],'base64')).digest('hex').slice(0,12)+'.webp';return existsSync(path.resolve(__dirname,'public',name))?'/'+name:src;});}
             const target=path.resolve(__dirname,'src/portfolio.json');
             const content=JSON.stringify({...data,contentSource:'project'},null,2)+'\n';
             await writeFile(target+'.tmp',content,'utf8');
