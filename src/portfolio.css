@@ -61,3 +61,6 @@ html:has(body.spring-theme),body.spring-theme,.portfolio-view.spring-theme,.spri
 
 /* Extend the portrait frame above the existing About heading without moving content. */
 .about.section::after{top:12px;width:min(392px,calc(100% - 40px))}@media(max-width:600px){.about.section::after{top:8px;width:min(360px,calc(100% - 28px))}}
+
+/* Soft moonlight and cloud haze behind the original studio logo. */
+.spring-theme .hero-light{background:radial-gradient(ellipse at 50% 31%,#ffffff20 0%,#ffffff0d 19%,transparent 48%),radial-gradient(ellipse at 40% 39%,#ffffff0b,transparent 30%),radial-gradient(ellipse at 64% 36%,#ffffff0d,transparent 34%)!important}.hero-light::after{content:"";position:absolute;left:18%;right:15%;top:25%;height:25%;background:radial-gradient(ellipse at 24% 55%,#ffffff15,transparent 38%),radial-gradient(ellipse at 57% 40%,#ffffff12,transparent 42%),radial-gradient(ellipse at 83% 64%,#ffffff10,transparent 33%);filter:blur(18px);opacity:.7;pointer-events:none}.intro-hanja{font-size:.65em;margin-left:.3em;letter-spacing:.06em;opacity:.8}
