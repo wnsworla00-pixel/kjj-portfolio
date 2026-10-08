@@ -81,3 +81,8 @@ html:has(body.spring-theme),body.spring-theme,.portfolio-view.spring-theme,.spri
 
 /* Lift the English wordmark without moving the Intro section. */
 .studio-logo-english{transform:translateY(-150%)}
+
+/* Center genre navigation, including wrapped rows on mobile. */
+.work-toolbar{justify-content:center}
+.filters{width:100%;justify-content:center}
+.filters button{align-items:center;text-align:center}
