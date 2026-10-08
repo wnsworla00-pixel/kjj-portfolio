@@ -75,4 +75,6 @@ html:has(body.spring-theme),body.spring-theme,.portfolio-view.spring-theme,.spri
 /* Restore the Korean lettering independently of the original symbol. */
 .studio-logo-korean{position:relative}
 .studio-logo-korean>.studio-logo-symbol{clip-path:inset(0 0 49% 0)}
-.studio-logo-korean>.studio-logo-hangul{position:absolute;top:70.45%;left:21.75%;width:56.5%;height:29.55%;object-fit:contain;filter:brightness(0) invert(1)}
+.studio-logo-korean>.studio-logo-hangul{position:absolute;top:70.45%;left:50%;width:calc(56.5% + 13.725pt);height:calc(29.55% + 5pt);transform:translateX(-50%);object-fit:contain;filter:brightness(0) invert(1)}
+
+.studio-logo-korean{overflow:visible}
