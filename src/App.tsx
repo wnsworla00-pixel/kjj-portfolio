@@ -197,12 +197,12 @@ const EditableText = ({
   );
 };
 
-const isDev = import.meta.env.DEV;
+const isDev = true;
 
-export default function App() {
+export default function App({initialData, initialSha}: {initialData: PortfolioData; initialSha: string}) {
   return (
     <ErrorBoundary>
-      <PortfolioApp />
+      <PortfolioApp initialData={initialData} initialSha={initialSha} />
     </ErrorBoundary>
   );
 }
@@ -243,33 +243,12 @@ const compressBase64Image = (base64: string, maxWidth = 800, quality = 0.6): Pro
   });
 };
 
-function PortfolioApp() {
-  const [data, setData] = useState<PortfolioData>(() => {
-    try {
-      const draft = localStorage.getItem('portfolio_draft');
-      if (draft) {const parsed=JSON.parse(draft);parsed.about={...INITIAL_DATA.about,...parsed.about,businessCardBackground:(!parsed.about?.businessCardBackground||parsed.about.businessCardBackground==='/business-card-background.png')?INITIAL_DATA.about.businessCardBackground:parsed.about.businessCardBackground,businessCardPdf:parsed.about?.businessCardPdf||INITIAL_DATA.about.businessCardPdf};for(const style of Object.values(parsed.textStyles||{}) as {color:string}[]){if(/^#(?:f97316|b75e15|ea875d|eb6c05)$/i.test(style.color))style.color="#21F1A8";}if(parsed.style)parsed.style.accentColor="#21F1A8";return parsed;}
-    } catch (e) {
-      console.error("Failed to load draft", e);
-    }
-    return INITIAL_DATA;
-  });
-  const [backupData, setBackupData] = useState<PortfolioData | null>(null);
-  const [isEditMode, setIsEditMode] = useState(() => {
-    return localStorage.getItem('portfolio_draft') !== null;
-  });
-
-  useEffect(() => {
-    if (isEditMode) {
-      try {
-        localStorage.setItem('portfolio_draft', JSON.stringify(data));
-      } catch (e) {
-        console.warn("Failed to save draft to localStorage (likely quota exceeded).", e);
-        // Optionally, we could clear the draft if it's too big, but just catching the error prevents the crash.
-      }
-    } else {
-      localStorage.removeItem('portfolio_draft');
-    }
-  }, [isEditMode, data]);
+function PortfolioApp({initialData,initialSha}: {initialData: PortfolioData; initialSha:string}) {
+  const [data,setData]=useState<PortfolioData>(initialData);
+  const [sha,setSha]=useState(initialSha);
+  const [backupData,setBackupData]=useState<PortfolioData|null>(null);
+  const [isEditMode,setIsEditMode]=useState(true);
+  useEffect(()=>{localStorage.removeItem('portfolio_draft');},[]);
   const [expandedGenre, setExpandedGenre] = useState<string | null>(null);
   const [expandedYears, setExpandedYears] = useState<Record<string, boolean>>({});
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -292,15 +271,16 @@ function PortfolioApp() {
     return()=>{document.removeEventListener('contextmenu',protectImage);document.removeEventListener('dragstart',protectImage);};
   },[]);
 
-  const saveProject = async () => {
+  const persist = async (next:PortfolioData) => {
+    const response=await fetch('/api/editor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:next,sha})});
+    const result=await response.json();
+    if(!response.ok||!result.saved)throw new Error(result.error||'저장 실패');
+    setSha(result.sha);setBackupData(null);
+  };
+  const saveProject=async()=>{
     setIsSaving(true);
-    try {
-      const response=await fetch('/__editor/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-      const result=await response.json();
-      if(!result.saved) throw new Error('저장 실패');
-      setIsEditMode(false);setBackupData(null);
-      alert(result.published?(result.unchanged?'저장했습니다. 공개 사이트와 같은 내용입니다.':'저장했습니다. 공개 사이트 자동 업데이트를 시작했습니다. 반영까지 잠시 걸립니다.'):'프로젝트에는 저장했습니다. 공개 사이트 자동 업데이트에 실패했습니다. GitHub 게시 연결을 확인한 뒤 다시 저장해 주세요.');
-    } catch(error){alert('프로젝트에 저장하지 못했습니다. 수정 내용은 임시로 보관했습니다.');}
+    try{await persist(data);alert('저장했습니다. 운영 사이트 반영에는 잠시 시간이 걸립니다.');}
+    catch(error){alert((error as Error).message);}
     finally{setIsSaving(false);}
   };
 
@@ -662,9 +642,15 @@ function PortfolioApp() {
     setDisplayProjects(prev => updateList(prev));
   };
 
-  const removeProject = (id: string) => {
-    setData(prev => ({ ...prev, projects: prev.projects.filter(p => p.id !== id) }));
-    setDisplayProjects(prev => prev.filter(p => p.id !== id));
+  const removeProject=async(id:string)=>{
+    const project=data.projects.find(p=>p.id===id);
+    if(!project||isSaving)return;
+    if(window.prompt('공연 정보와 사진 링크를 현재 저장 데이터에서 삭제합니다. 다른 수정 내용도 함께 저장됩니다. Git 기록과 외부 원본 사진은 남습니다. 삭제하려면 공연명을 입력해 주세요.', '')!==project.title)return;
+    const next={...data,projects:data.projects.filter(p=>p.id!==id),textStyles:Object.fromEntries(Object.entries(data.textStyles||{}).filter(([key])=>!key.startsWith('projects.'+id+'.')))};
+    setIsSaving(true);
+    try{await persist(next);setData(next);setDisplayProjects(next.projects);setSelectedProjectId(null);setSelectedPath(null);alert('삭제했습니다. 운영 사이트에도 곧 반영됩니다.');}
+    catch(error){alert((error as Error).message);}
+    finally{setIsSaving(false);}
   };
 
   const StyleSettings = () => {
@@ -1572,6 +1558,7 @@ function PortfolioApp() {
                 "overflow-y-auto p-8 md:p-16 space-y-12 custom-scrollbar",
                 isEditMode && "pt-24 md:pt-32" // Push down to avoid overlap with StyleSettings bar
               )}>
+                {isEditMode && <button disabled={isSaving} onClick={()=>removeProject(selectedProject.id)} className="px-4 py-3 rounded-xl bg-red-500/20 text-red-400 border border-red-500/40 disabled:opacity-40">공연 삭제</button>}
                 {/* Modal Header */}
                 <div className="space-y-4">
                   {isEditMode ? <div className="project-classification">
