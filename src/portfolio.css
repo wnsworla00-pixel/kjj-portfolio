@@ -78,3 +78,6 @@ html:has(body.spring-theme),body.spring-theme,.portfolio-view.spring-theme,.spri
 .studio-logo-korean>.studio-logo-hangul{position:absolute;top:71.5%;left:50%;width:calc(84.75% + 20.5875pt);height:calc(44.325% + 7.5pt);transform:translate(-50%,-50%);object-fit:contain;filter:brightness(0) invert(1)}
 
 .studio-logo-korean{overflow:visible}
+
+/* Lift the English wordmark without moving the Intro section. */
+.studio-logo-english{transform:translateY(-150%)}
