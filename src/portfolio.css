@@ -64,3 +64,10 @@ html:has(body.spring-theme),body.spring-theme,.portfolio-view.spring-theme,.spri
 
 /* Soft moonlight and cloud haze behind the original studio logo. */
 .spring-theme .hero-light{background:radial-gradient(ellipse at 50% 31%,#ffffff20 0%,#ffffff0d 19%,transparent 48%),radial-gradient(ellipse at 40% 39%,#ffffff0b,transparent 30%),radial-gradient(ellipse at 64% 36%,#ffffff0d,transparent 34%)!important}.hero-light::after{content:"";position:absolute;left:18%;right:15%;top:25%;height:25%;background:radial-gradient(ellipse at 24% 55%,#ffffff15,transparent 38%),radial-gradient(ellipse at 57% 40%,#ffffff12,transparent 42%),radial-gradient(ellipse at 83% 64%,#ffffff10,transparent 33%);filter:blur(18px);opacity:.7;pointer-events:none}.intro-hanja{font-size:.65em;margin-left:.3em;letter-spacing:.06em;opacity:.8}
+
+/* Keep the original mountain and Korean lettering; replace only its lower Hanja. */
+.studio-logo-lockup{width:min(335px,51%);position:relative;display:flex;flex-direction:column;align-items:center}
+.studio-logo-korean{width:100%;aspect-ratio:377/308;overflow:hidden}
+.studio-logo-korean>img{display:block;width:100%;height:auto}
+.studio-logo-english{display:block;width:33.9%;height:auto;margin-top:22px;filter:brightness(0) invert(1)}
+@media(max-width:600px){.studio-logo-lockup{width:min(210px,67.5%)}.studio-logo-english{margin-top:16px}}
