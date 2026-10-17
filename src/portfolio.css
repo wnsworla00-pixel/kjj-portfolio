@@ -86,3 +86,20 @@ html:has(body.spring-theme),body.spring-theme,.portfolio-view.spring-theme,.spri
 .work-toolbar{justify-content:center}
 .filters{width:100%;justify-content:center}
 .filters button{align-items:center;text-align:center}
+
+/* Keep photo navigation below the image with clear, touch-friendly controls. */
+.project-dialog{border-color:#ffffff24;border-radius:16px}
+.project-dialog .dialog-top{color:#bdc8c3;border-bottom:1px solid #ffffff10}
+.gallery-controls{display:flex;align-items:center;justify-content:center;gap:20px;padding:16px 20px;border-bottom:1px solid #ffffff10;background:#1c1c1c}
+.gallery-controls>button{position:static;transform:none;display:grid;place-items:center;width:44px;height:44px;padding:0;border:1px solid #ffffff30;border-radius:50%;background:#ffffff06;color:#f5f5f5;cursor:pointer;touch-action:manipulation}
+.gallery-controls>button:hover{background:#21F1A812;border-color:#21F1A8;color:#21F1A8}
+.gallery-controls>button:active{background:#21F1A825}
+.gallery-controls>button:focus-visible{outline:2px solid #21F1A8;outline-offset:4px}
+.gallery-controls .gallery-count{position:static;transform:none;display:flex;align-items:center;justify-content:center;gap:10px;min-width:76px;padding:0;background:none;color:#b8c1bc;font-size:14px;line-height:1.5;font-variant-numeric:tabular-nums}
+.gallery-count strong{color:#fff;font-weight:600}
+.project-dialog .dialog-info{padding:24px 30px 20px}
+.project-dialog .dialog-info h2{line-height:1.45;overflow-wrap:anywhere}
+.project-dialog .dialog-info p{color:#bdc8c3;line-height:1.75}
+.project-dialog .thumbnails{gap:10px}
+.project-dialog .thumbnails button{border-radius:8px;overflow:hidden}
+@media(max-width:600px){.project-dialog{border-radius:12px}.gallery-controls{padding:14px 20px;gap:24px}.project-dialog .dialog-info{padding:20px}.project-dialog .dialog-info h2{font-size:20px}.project-dialog .thumbnails button{width:68px;height:50px}}
