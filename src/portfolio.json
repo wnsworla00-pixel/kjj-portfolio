@@ -577,6 +577,16 @@
   },
   "projects": [
     {
+      "id": "2026-hihihistory-lighting-programmer",
+      "title": "[현대무용] 히히히스토리",
+      "genre": "Dance",
+      "role": "Lighting Programmer",
+      "location": "대학로예술극장 소극장",
+      "year": "2026",
+      "images": [],
+      "description": "현대무용 〈히히히스토리〉에 조명 프로그래머로 참여."
+    },
+    {
       "id": "1791482714560",
       "title": "오!  당신이 잠든 사이 [서울문화고]",
       "genre": "Musical",
