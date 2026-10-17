@@ -577,6 +577,18 @@
   },
   "projects": [
     {
+      "id": "2026-body-story-iv-connecting",
+      "title": "[현대무용] 몸 이야기 IV : 연결하기",
+      "genre": "Dance",
+      "role": "Lighting Designer",
+      "location": "구로 창의아트홀",
+      "year": "2026",
+      "images": [
+        "https://lh3.googleusercontent.com/d/1S75eVS1iQ8OChbafkN4wHZk0ZpSC0MxW"
+      ],
+      "description": "현대무용 〈몸 이야기 IV : 연결하기〉에 조명 디자이너로 참여."
+    },
+    {
       "id": "2026-hihihistory-lighting-programmer",
       "title": "[현대무용] 히히히스토리",
       "genre": "Dance",
