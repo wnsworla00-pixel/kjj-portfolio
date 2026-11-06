@@ -577,6 +577,15 @@
   },
   "projects": [
     {
+      "id": "1793960519232",
+      "title": "[한국무용] 예무제",
+      "genre": "Dance",
+      "role": "Lighting Designer",
+      "location": "호원아트홀",
+      "year": "2026",
+      "images": []
+    },
+    {
       "id": "2026-body-story-iv-connecting",
       "title": "[현대무용] 몸 이야기 IV : 연결하기",
       "genre": "Dance",
