@@ -578,12 +578,14 @@
   "projects": [
     {
       "id": "1793960519232",
-      "title": "[한국무용] 예무제",
+      "title": "[한국무용]  Dream Scape 꿈의정원",
       "genre": "Dance",
       "role": "Lighting Designer",
       "location": "호원아트홀",
       "year": "2026",
-      "images": []
+      "images": [
+        "https://lh3.googleusercontent.com/d/1B-qzDsX71_Yi3JkJA6owPeKTZ21gBtup"
+      ]
     },
     {
       "id": "2026-body-story-iv-connecting",
