@@ -577,6 +577,24 @@
   },
   "projects": [
     {
+      "id": "1794802924898",
+      "title": "[한국무용] 나의 주사위는 던져졌다",
+      "genre": "Dance",
+      "role": "Lighting Designer",
+      "location": "부평문화사랑방",
+      "year": "2026",
+      "images": []
+    },
+    {
+      "id": "1794802890867",
+      "title": "말말말",
+      "genre": "Theatre",
+      "role": "Lighting Designer",
+      "location": "삼일로창고극장",
+      "year": "2026",
+      "images": []
+    },
+    {
       "id": "1793960519232",
       "title": "[한국무용]  Dream Scape 꿈의정원",
       "genre": "Dance",
